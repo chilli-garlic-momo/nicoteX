@@ -1,28 +1,75 @@
+import os
 import torch
-from model.autoEncoder import Autoencoder, preprocess
 import pandas as pd
 import numpy as np
+from model.autoEncoder import Autoencoder
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
-# Load preprocessing artifacts
-enc = pd.read_pickle('onehot.pkl')
-scaler = pd.read_pickle('scaler.pkl')
+# Paths for model and preprocessors relative to this file
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_DIR = os.path.join(BASE_DIR, '..', 'model')
 
-# Load the trained model
+# Load preprocessing artifacts with correct paths
+enc_path = os.path.join(MODEL_DIR, 'onehot.pkl')
+scaler_path = os.path.join(MODEL_DIR, 'scaler.pkl')
+
+enc = pd.read_pickle(enc_path)
+scaler = pd.read_pickle(scaler_path)
+
+model = None  # Global model variable
+
+
+def preprocess(df):
+    """
+    Preprocess a DataFrame of transactions for scoring:
+    - Scale numeric 'amount'
+    - One-hot encode categorical features: location, device, merchant
+    Returns a numpy array ready for PyTorch model input.
+    """
+    # Extract features expected by model
+    X_num = scaler.transform(df[['amount']])
+    X_cat = enc.transform(df[['location', 'device', 'merchant']])
+    X_final = np.hstack([X_num, X_cat])
+    return X_final
+
+
 def load_model():
-    dummy_df = pd.read_csv('syntheticTransactions.csv').head(1)
-    X_dummy, _, _ = preprocess(dummy_df)
-    model = Autoencoder(X_dummy.shape[1])
-    model.load_state_dict(torch.load('autoencoder.pth', map_location='cpu'))
-    model.eval()
+    """
+    Load and cache the trained autoencoder model.
+    """
+    global model
+    if model is None:
+        # Determine input dimension from encoder output + 1 numeric feature
+        input_dim = scaler.transform(np.array([[0]])).shape[1] + enc.transform(
+            [['Mumbai', 'android', 'Cafe']]
+        ).shape[1]
+
+        model_inst = Autoencoder(input_dim)
+        model_path = os.path.join(MODEL_DIR, 'autoencoder.pth')
+        model_inst.load_state_dict(torch.load(model_path, map_location='cpu'))
+        model_inst.eval()
+        model = model_inst
     return model
 
-# Scoring function
+
 def score_transaction(txn):
-    X, _, _ = preprocess(pd.DataFrame([txn]))
-    X_torch = torch.tensor(X, dtype=torch.float32)
+    """
+    Given a single transaction dict, preprocess and score anomaly:
+    Returns:
+      - reconstruction_error (float)
+      - alert_flag (bool)
+    """
+    df = pd.DataFrame([txn])
+    X = preprocess(df)
+
+    X_tensor = torch.tensor(X, dtype=torch.float32)
     model = load_model()
-    decoded = model(X_torch)
-    error = ((X_torch - decoded).abs().mean()).item()
-    # Dynamic threshold: for demo, use 0.25 (tune as needed)
-    alert = error > 0.25
+
+    with torch.no_grad():
+        output = model(X_tensor)
+    error = torch.mean(torch.abs(output - X_tensor)).item()
+
+    threshold = 0.25  # Demo threshold to mark anomaly
+    alert = error > threshold
+
     return error, alert
