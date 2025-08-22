@@ -1,5 +1,7 @@
+# run everything from the main directory
 pip install pandas numpy torch scikit-learn fastapi uvicorn requests
 
-python backend/dataGen/normal.py         # creates normal_transactions.csv
-python backend/dataGen/fraudPatterns.py  # injects frauds, creates synthetic_transactions.csv
-python backend/model/autoEncoder.py      # autoencoder.pth, onehot.pkl, scaler.pkl
+cd backend/dataGen
+python normal.py         # creates normal_transactions.csv
+python fraudPatterns.py  # injects frauds, creates synthetic_transactions.csv
+python backend/model/autoEncoder.py      # autoencoder.pth, onehot.pkl, scaler.pkl 

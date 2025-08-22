@@ -29,7 +29,7 @@ class Autoencoder(nn.Module):
         return decoded
 
 def preprocess(df):
-    enc = OneHotEncoder(sparse=False)
+    enc = OneHotEncoder(sparse_output=False)
     scaler = StandardScaler()
     # Select relevant features (drop user_id, timestamp for modeling)
     X = df[['amount', 'location', 'device', 'merchant']].copy()
