@@ -23,8 +23,8 @@ def inject_frauds(df, num_frauds=100):
     fraud_df = pd.DataFrame(frauds)
     out = pd.concat([df, fraud_df], ignore_index=True)
     out['is_fraud'] = out.get('is_fraud', False)
-    out.to_csv('synthetic_transactions.csv', index=False)
+    out.to_csv('syntheticTransactions.csv', index=False)
 
 if __name__ == "__main__":
-    df = pd.read_csv('normal_transactions.csv')
+    df = pd.read_csv('normalTransactions.csv')
     inject_frauds(df)

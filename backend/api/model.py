@@ -9,7 +9,7 @@ scaler = pd.read_pickle('scaler.pkl')
 
 # Load the trained model
 def load_model():
-    dummy_df = pd.read_csv('synthetic_transactions.csv').head(1)
+    dummy_df = pd.read_csv('syntheticTransactions.csv').head(1)
     X_dummy, _, _ = preprocess(dummy_df)
     model = Autoencoder(X_dummy.shape[1])
     model.load_state_dict(torch.load('autoencoder.pth', map_location='cpu'))

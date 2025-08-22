@@ -38,4 +38,4 @@ def generate_dataset():
 
 if __name__ == "__main__":
     df = generate_dataset()
-    df.to_csv('normal_transactions.csv', index=False)
+    df.to_csv('normalTransactions.csv', index=False)

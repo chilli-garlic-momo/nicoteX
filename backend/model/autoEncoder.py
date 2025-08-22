@@ -66,5 +66,5 @@ def train_ae(df):
 
 if __name__ == "__main__":
     import numpy as np
-    df = pd.read_csv('synthetic_transactions.csv')
+    df = pd.read_csv('../dataGen/syntheticTransactions.csv')
     train_ae(df)

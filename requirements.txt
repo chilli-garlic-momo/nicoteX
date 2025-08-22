@@ -2,6 +2,6 @@
 pip install pandas numpy torch scikit-learn fastapi uvicorn requests
 
 cd backend/dataGen
-python normal.py         # creates normal_transactions.csv
-python fraudPatterns.py  # injects frauds, creates synthetic_transactions.csv
+python normal.py         # creates normalTransactions.csv
+python fraudPatterns.py  # injects frauds, creates syntheticTransactions.csv
 python backend/model/autoEncoder.py      # autoencoder.pth, onehot.pkl, scaler.pkl 
