@@ -1,79 +1,509 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Live Transaction Monitoring Dashboard</title>
-    <link rel="stylesheet" href="style.css" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet" />
+  <meta charset="UTF-8" />
+  <title>Secure Banking Portal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js"></script>
 </head>
 <body>
-    <div class="sidebar" id="sidebar">
+  <!-- LOGIN PAGE -->
+  <div id="login-page">
+    <div class="login-container glass">
+      <div class="login-header">
+        <h1>FinDash</h1>
+        <p class="login-subtitle">Secure Banking Portal</p>
+      </div>
+
+      <form id="login-form" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <div class="input-wrapper">
+            <input 
+              type="text" 
+              id="username" 
+              class="form-input" 
+              placeholder="Enter your username" 
+              required 
+              autocomplete="username"
+            />
+            <img class="input-icon" src="https://img.icons8.com/ios-filled/50/ffffff/user.png" alt="User icon"/>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="input-wrapper">
+            <input 
+              type="password" 
+              id="password" 
+              class="form-input" 
+              placeholder="Enter your password" 
+              required 
+              autocomplete="current-password"
+            />
+            <img class="input-icon" src="https://img.icons8.com/ios-filled/50/ffffff/lock.png" alt="Lock icon"/>
+          </div>
+        </div>
+
+        <div class="login-actions">
+          <button type="submit" class="btn btn-primary login-btn">
+            <span id="login-text">Sign In</span>
+            <div id="login-loading" class="loading" style="display: none;"></div>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- DASHBOARD PAGE -->
+  <div id="dashboard-page">
+    <div class="dashboard-layout">
+      <!-- Sidebar -->
+      <nav class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <div class="sidebar-icon" id="sidebar-icon" title="Menu">≡</div>
-            <h2 class="sidebar-title">FinDash</h2>
+          <h2 class="sidebar-title">FinDash</h2>
+          <img src="https://img.icons8.com/ios-filled/50/ffffff/bank.png" alt="FinDash Logo" class="sidebar-logo"/>
+          <span class="sidebar-fd-logo">FD</span> <!-- FD Logo -->
+          <button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Toggle sidebar">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M3 12h18m-9-9l9 9-9 9"/>
+            </svg>
+          </button>
         </div>
-        <ul class="sidebar-list">
-            <div class="sidebar-list-elements">
-                <img src="../assets/search icon.png" class="sidebar-list-icons" alt="dashboard" />
-                <input type="text" class="" placeholder="Dashboard" />
-            </div>
-            <div class="sidebar-list-elements">
-                <img src="../assets/search icon.png" class="sidebar-list-icons" alt="alerts" />
-                <input type="text" class="" placeholder="Alerts" />
-            </div>
-            <div class="sidebar-list-elements">
-                <img src="../assets/search icon.png" class="sidebar-list-icons" alt="explanation" />
-                <input type="text" class="" placeholder="Explanation" />
-            </div>
-            <div class="sidebar-list-elements">
-                <img src="../assets/search icon.png" class="sidebar-list-icons" alt="scenarios" />
-                <input type="text" class="" placeholder="Scenarios" />
-            </div>
+
+        <ul class="sidebar-nav">
+          <li class="sidebar-nav-item">
+            <a href="#" class="sidebar-nav-link active" data-section="dashboard">
+              <div class="sidebar-nav-icon">🏠</div> <!-- Dashboard icon -->
+              <span class="sidebar-nav-text">Dashboard</span>
+            </a>
+          </li>
+          <li class="sidebar-nav-item">
+            <a href="#" class="sidebar-nav-link" data-section="alerts">
+              <div class="sidebar-nav-icon">🚨</div> <!-- Alerts icon -->
+              <span class="sidebar-nav-text">Fraud Alerts</span>
+            </a>
+          </li>
+          <li class="sidebar-nav-item">
+            <a href="#" class="sidebar-nav-link" data-section="transactions">
+              <div class="sidebar-nav-icon">💸</div> <!-- Transactions icon -->
+              <span class="sidebar-nav-text">Transactions</span>
+            </a>
+          </li>
+          <li class="sidebar-nav-item">
+            <a href="#" class="sidebar-nav-link" data-section="scenarios">
+              <div class="sidebar-nav-icon">🔬</div> <!-- Scenarios icon -->
+              <span class="sidebar-nav-text">Scenarios</span>
+            </a>
+          </li>
         </ul>
-        <button class="activate-super">Activate Super</button>
-    </div>
-    <div class="main-content">
-        <div class="header">
-            <span class="user">Hello!  User</span>
-            <button class="deposit-btn">Deposit</button>
-            <div class="search-container">
-                <input type="text" class="search" placeholder="Search transactions..." />
-                <img src="../assets/search icon.png" class="search-icon" alt="Search" />
-            </div>
+
+        <div class="sidebar-footer">
+          <button class="btn btn-danger" onclick="handleLogout()">
+            
+            <span class="sidebar-nav-text">Sign Out</span>
+          </button>
         </div>
-        <div class="top-row">
-            <div class="card transactions">
-                <h3>Live Transactions</h3>
-                <div id="transaction-stream"></div>
+      </nav>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <header class="main-header">
+          <div class="header-left">
+            <h2 id="page-title">Dashboard Overview</h2>
+            <p class="header-subtitle" id="page-subtitle">Monitor your banking security in real-time</p>
+          </div>
+          <div class="header-actions">
+            <div class="user-info">
+              <div class="user-avatar">U</div>
+              <span id="welcome-message">Welcome back</span>
             </div>
-            <div class="card alerts">
-                <h3>Fraud Alerts</h3>
-                <div id="alert-list"></div>
+            
+          </div>
+        </header>
+
+        <!-- Dashboard Content -->
+        <div id="dashboard-content" class="page-content">
+          <div class="dashboard-grid">
+            <div class="dashboard-card">
+              <div class="card-header">
+                <h3 class="card-title">CSV Data Upload</h3>
+              </div>
+              <div class="card-content">
+                <input type="file" id="csvFileInput" accept=".csv" style="display: none;"/>
+                <label for="csvFileInput" class="btn btn-primary" style="margin-bottom: 1rem; display: block; text-align: center;">
+                  Choose CSV File
+                </label>
+                <div id="csvDragDropArea" style="border: 2px dashed var(--border); border-radius: 12px; padding: 2rem; text-align: center; color: var(--text-muted);">
+                  Drag & Drop CSV File Here
+                </div>
+                <p id="fileNameDisplay" style="margin-top: 1rem; font-size: 0.9rem; color: var(--text-secondary);"></p>
+                <div class="chart-placeholder" style="margin-top: 1rem;">
+                  📊 Uploaded CSV data will be displayed here
+                </div>
+              </div>
             </div>
-            <div class="card explanation">
-                <h3>Explanation</h3>
-                <div id="explanation-box"></div>
+
+            <div class="dashboard-card">
+              <div class="card-header">
+                <h3 class="card-title">Recent Transactions</h3>
+                <span class="status-indicator status-success">●  Active</span>
+              </div>
+              <div class="card-content" id="transaction-stream">
+                <p>Monitoring recent transaction feed...</p>
+                <p style="margin-top: 0.5rem; color: var(--text-muted); font-size: 0.9rem;">
+                  Last update: <span id="last-update">Just now</span>
+                </p>
+              </div>
             </div>
-        </div>
-        <div class="bottom-row">
-            <div class="card chart">
-                <h3>Transaction Stats</h3>
-                <div id="plot-area"></div>
+
+            <div class="dashboard-card">
+              <div class="card-header">
+                <h3 class="card-title">Fraud Alerts</h3>
+                <span class="status-indicator status-success">●  Clear</span>
+              </div>
+              <div class="card-content" id="alert-list">
+                <p>No suspicious activity detected</p>
+                <p style="margin-top: 0.5rem; color: var(--text-muted); font-size: 0.9rem;">
+                  System status: All monitors active
+                </p>
+              </div>
             </div>
-            <div class="card scenarios">
-                <h3>Synthetic Scenarios</h3>
-                <select id="scenario-filter">
-                    <option value="normal">Normal</option>
-                    <option value="fraud-type-1">Fraud Type 1</option>
-                    <option value="fraud-type-2">Fraud Type 2</option>
+
+            <div class="dashboard-card">
+              <div class="card-header">
+                <h3 class="card-title">Risk Analysis</h3>
+                <span class="status-indicator status-warning">●  Monitoring</span>
+              </div>
+              <div class="card-content" id="explanation-box">
+                <p>Advanced fraud detection algorithms are continuously analyzing transaction patterns to identify potential threats.</p>
+              </div>
+            </div>
+
+            <div class="dashboard-card">
+              <div class="card-header">
+                <h3 class="card-title">Transaction Statistics</h3>
+              </div>
+              <div class="card-content">
+                <div class="chart-placeholder">
+                  📊 Interactive charts will be displayed here
+                </div>
+              </div>
+            </div>
+
+            <div class="dashboard-card">
+              <div class="card-header">
+                <h3 class="card-title">Synthetic Scenarios</h3>
+              </div>
+              <div class="card-content">
+                <select class="form-input" id="scenario-filter" style="margin-bottom: 1rem;">
+                  <option value="normal">Normal Operations</option>
+                  <option value="fraud-type-1">Card Fraud Simulation</option>
+                  <option value="fraud-type-2">Identity Theft Simulation</option>
+                  <option value="fraud-type-3">Account Takeover Simulation</option>
                 </select>
-                <div id="synthetic-details"></div>
+                <div id="synthetic-details">
+                  <p>Select a scenario to view detailed fraud simulation parameters and expected system responses.</p>
+                </div>
+              </div>
             </div>
+
+            <div class="dashboard-card">
+              <div class="card-header">
+                <h3 class="card-title">System Health</h3>
+                <span class="status-indicator status-success">●  Optimal</span>
+              </div>
+              <div class="card-content">
+                <p>All fraud detection systems are operating within normal parameters.</p>
+                <div style="margin-top: 1rem; display: flex; gap: 1rem; font-size: 0.9rem;">
+                  <div>CPU: <strong>23%</strong></div>
+                  <div>Memory: <strong>67%</strong></div>
+                  <div>Network: <strong>Normal</strong></div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+
+        <!-- Alerts Content -->
+        <div id="alerts-content" class="page-content" style="display: none;">
+          <div class="dashboard-grid">
+            <div class="dashboard-card">
+              <div class="card-header">
+                <h3 class="card-title">Active Alerts</h3>
+                <span class="status-indicator status-success">●  0 Active</span>
+              </div>
+              <div class="card-content">
+                <div class="alert-item" style="padding: 1rem; background: var(--surface); border-radius: 8px; margin-bottom: 1rem;">
+                  <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                    <span style="color: var(--success);">✅</span>
+                    <strong>System Status: Normal</strong>
+                  </div>
+                  <p style="color: var(--text-muted); font-size: 0.9rem;">All fraud detection systems are operating normally. No suspicious activities detected in the last 24 hours.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="dashboard-card">
+              <div class="card-header">
+                <h3 class="card-title">Alert History</h3>
+              </div>
+              <div class="card-content">
+                <div class="alert-history">
+                  <div class="history-item" style="display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid var(--glass-border);">
+                    <div>
+                      <div style="font-weight: 600;">Unusual Login Pattern</div>
+                      <div style="color: var(--text-muted); font-size: 0.9rem;">Multiple login attempts from new device</div>
+                    </div>
+                    <div style="text-align: right;">
+                      <div style="color: var(--warning);">Resolved</div>
+                      <div style="color: var(--text-muted); font-size: 0.85rem;">2 days ago</div>
+                    </div>
+                  </div>
+                  <div class="history-item" style="display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid var(--glass-border);">
+                    <div>
+                      <div style="font-weight: 600;">High-Value Transaction</div>
+                      <div style="color: var(--text-muted); font-size: 0.9rem;">Transaction above normal spending pattern</div>
+                    </div>
+                    <div style="text-align: right;">
+                      <div style="color: var(--success);">Verified</div>
+                      <div style="color: var(--text-muted); font-size: 0.85rem;">5 days ago</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="dashboard-card">
+              <div class="card-header">
+                <h3 class="card-title">Alert Settings</h3>
+              </div>
+              <div class="card-content">
+                <div style="margin-bottom: 1rem;">
+                  <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
+                    <input type="checkbox" checked style="accent-color: var(--primary);">
+                    Email notifications for high-risk transactions
+                  </label>
+                  <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
+                    <input type="checkbox" checked style="accent-color: var(--primary);">
+                    SMS alerts for login from new devices
+                  </label>
+                  <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
+                    <input type="checkbox" style="accent-color: var(--primary);">
+                    Push notifications for all transactions
+                  </label>
+                </div>
+                <button class="btn btn-primary" style="font-size: 0.9rem; padding: 0.5rem 1rem;">
+                  Update Settings
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Transactions Content -->
+        <div id="transactions-content" class="page-content" style="display: none;">
+          <div class="dashboard-grid">
+            <div class="dashboard-card" style="grid-column: 1 / -1;">
+              <div class="card-header">
+                <h3 class="card-title">Transaction History</h3>
+                <div style="display: flex; gap: 1rem;">
+                  <select class="form-input" style="width: auto; padding: 0.5rem;">
+                    <option>Last 30 days</option>
+                    <option>Last 7 days</option>
+                    <option>Last 90 days</option>
+                  </select>
+                  <input type="text" class="form-input" placeholder="Search transactions..." style="width: 200px; padding: 0.5rem;">
+                </div>
+              </div>
+              <div class="card-content">
+                <div class="transaction-table" style="overflow-x: auto;">
+                  <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                      <tr style="border-bottom: 1px solid var(--glass-border);">
+                        <th style="text-align: left; padding: 1rem 0.5rem; color: var(--text-secondary);">Date</th>
+                        <th style="text-align: left; padding: 1rem 0.5rem; color: var(--text-secondary);">Description</th>
+                        <th style="text-align: left; padding: 1rem 0.5rem; color: var(--text-secondary);">Amount</th>
+                        <th style="text-align: left; padding: 1rem 0.5rem; color: var(--text-secondary);">Status</th>
+                        <th style="text-align: left; padding: 1rem 0.5rem; color: var(--text-secondary);">Risk Score</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr style="border-bottom: 1px solid var(--glass-border);">
+                        <td style="padding: 1rem 0.5rem;">2024-08-23</td>
+                        <td style="padding: 1rem 0.5rem;">Online Purchase - Amazon</td>
+                        <td style="padding: 1rem 0.5rem; color: var(--error);">-$156.99</td>
+                        <td style="padding: 1rem 0.5rem;"><span class="status-indicator status-success">Verified</span></td>
+                        <td style="padding: 1rem 0.5rem;"><span style="color: var(--success);">Low</span></td>
+                      </tr>
+                      <tr style="border-bottom: 1px solid var(--glass-border);">
+                        <td style="padding: 1rem 0.5rem;">2024-08-22</td>
+                        <td style="padding: 1rem 0.5rem;">ATM Withdrawal</td>
+                        <td style="padding: 1rem 0.5rem; color: var(--error);">-$200.00</td>
+                        <td style="padding: 1rem 0.5rem;"><span class="status-indicator status-success">Verified</span></td>
+                        <td style="padding: 1rem 0.5rem;"><span style="color: var(--success);">Low</span></td>
+                      </tr>
+                      <tr style="border-bottom: 1px solid var(--glass-border);">
+                        <td style="padding: 1rem 0.5rem;">2024-08-22</td>
+                        <td style="padding: 1rem 0.5rem;">Salary Deposit</td>
+                        <td style="padding: 1rem 0.5rem; color: var(--success);">+$3,500.00</td>
+                        <td style="padding: 1rem 0.5rem;"><span class="status-indicator status-success">Cleared</span></td>
+                        <td style="padding: 1rem 0.5rem;"><span style="color: var(--success);">None</span></td>
+                      </tr>
+                      <tr style="border-bottom: 1px solid var(--glass-border);">
+                        <td style="padding: 1rem 0.5rem;">2024-08-21</td>
+                        <td style="padding: 1rem 0.5rem;">Gas Station - Shell</td>
+                        <td style="padding: 1rem 0.5rem; color: var(--error);">-$45.67</td>
+                        <td style="padding: 1rem 0.5rem;"><span class="status-indicator status-success">Verified</span></td>
+                        <td style="padding: 1rem 0.5rem;"><span style="color: var(--success);">Low</span></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div class="dashboard-card">
+              <div class="card-header">
+                <h3 class="card-title">Monthly Summary</h3>
+              </div>
+              <div class="card-content">
+                <div style="margin-bottom: 1rem;">
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <span>Total Income:</span>
+                    <span style="color: var(--success); font-weight: 600;">+$7,250.00</span>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <span>Total Expenses:</span>
+                    <span style="color: var(--error); font-weight: 600;">-$2,847.32</span>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; padding-top: 0.5rem; border-top: 1px solid var(--glass-border);">
+                    <span style="font-weight: 600;">Net Change:</span>
+                    <span style="color: var(--success); font-weight: 600;">+$4,402.68</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="dashboard-card">
+              <div class="card-header">
+                <h3 class="card-title">Transaction Categories</h3>
+              </div>
+              <div class="card-content">
+                <div class="category-item" style="display: flex; justify-content: space-between; margin-bottom: 0.75rem;">
+                  <span>Shopping</span>
+                  <span style="font-weight: 600;">$856.23</span>
+                </div>
+                <div class="category-item" style="display: flex; justify-content: space-between; margin-bottom: 0.75rem;">
+                  <span>Groceries</span>
+                  <span style="font-weight: 600;">$432.11</span>
+                </div>
+                <div class="category-item" style="display: flex; justify-content: space-between; margin-bottom: 0.75rem;">
+                  <span>Gas & Transportation</span>
+                  <span style="font-weight: 600;">$267.89</span>
+                </div>
+                <div class="category-item" style="display: flex; justify-content: space-between; margin-bottom: 0.75rem;">
+                  <span>Restaurants</span>
+                  <span style="font-weight: 600;">$198.45</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Scenarios Content -->
+        <div id="scenarios-content" class="page-content" style="display: none;">
+          <div class="dashboard-grid">
+            <div class="dashboard-card">
+              <div class="card-header">
+                <h3 class="card-title">Scenario Generator</h3>
+              </div>
+              <div class="card-content">
+                <div style="margin-bottom: 1rem;">
+                  <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Fraud Type:</label>
+                  <select class="form-input" id="fraud-type-select">
+                    <option value="card-fraud">Card Fraud</option>
+                    <option value="identity-theft">Identity Theft</option>
+                    <option value="account-takeover">Account Takeover</option>
+                    <option value="phishing">Phishing Attack</option>
+                  </select>
+                </div>
+                <div style="margin-bottom: 1rem;">
+                  <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Severity Level:</label>
+                  <select class="form-input">
+                    <option value="low">Low Risk</option>
+                    <option value="medium">Medium Risk</option>
+                    <option value="high">High Risk</option>
+                  </select>
+                </div>
+                <button class="btn btn-primary">Generate Scenario</button>
+              </div>
+            </div>
+
+            <div class="dashboard-card">
+              <div class="card-header">
+                <h3 class="card-title">Active Scenarios</h3>
+              </div>
+              <div class="card-content">
+                <div class="scenario-item" style="padding: 1rem; background: var(--surface); border-radius: 8px; margin-bottom: 1rem;">
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <strong>Card Fraud Simulation #1</strong>
+                    <span class="status-indicator status-warning">●  Running</span>
+                  </div>
+                  <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.5rem;">Simulating unusual spending patterns across multiple merchant categories.</p>
+                  <div style="display: flex; gap: 1rem; font-size: 0.85rem;">
+                    <span>Duration: 15 min</span>
+                    <span>Transactions: 23</span>
+                    <span>Risk Score: 8.2/10</span>
+                  </div>
+                </div>
+                
+                <div class="scenario-item" style="padding: 1rem; background: var(--surface); border-radius: 8px; margin-bottom: 1rem;">
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <strong>Identity Theft Test #3</strong>
+                    <span class="status-indicator status-success">●  Completed</span>
+                  </div>
+                  <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.5rem;">Profile modification attempts and suspicious authentication patterns.</p>
+                  <div style="display: flex; gap: 1rem; font-size: 0.85rem;">
+                    <span>Duration: 30 min</span>
+                    <span>Attempts: 47</span>
+                    <span>Detection Rate: 96%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="dashboard-card">
+              <div class="card-header">
+                <h3 class="card-title">Scenario Results</h3>
+              </div>
+              <div class="card-content">
+                <div class="chart-placeholder" style="height: 150px;">
+                  📈 Scenario performance metrics will be displayed here
+                </div>
+                <div style="margin-top: 1rem;">
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <span>Detection Accuracy:</span>
+                    <span style="color: var(--success); font-weight: 600;">94.2%</span>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <span>False Positives:</span>
+                    <span style="color: var(--warning); font-weight: 600;">2.1%</span>
+                  </div>
+                  <div style="display: flex; justify-content: space-between;">
+                    <span>Response Time:</span>
+                    <span style="color: var(--success); font-weight: 600;">1.3s avg</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
     </div>
-    <script src="scripts.js"></script>
+  </div>
 </body>
 </html>

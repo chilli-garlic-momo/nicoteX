@@ -1,55 +1,270 @@
-// Add a transaction to the live transaction stream
-function addTransaction(tx) {
-    const el = document.createElement('div');
-    el.classList.add('transaction-item');
-    el.innerHTML = `<b>${tx.amount}</b> from <span>${tx.user}</span> — ${tx.device}<br><small>${tx.time}</small>`;
-    document.getElementById('transaction-stream').appendChild(el);
-}
+const app = {
+      isLoggedIn: false,
+      currentUser: null,
+      
+      init() {
+        this.checkAuthStatus();
+        this.setupEventListeners();
+        this.updateTimestamp();
+      },
 
-// Add a fraud alert
-function addAlert(alert) {
-    const el = document.createElement('div');
-    el.classList.add('alert-item');
-    el.innerHTML = `<span>⚠</span> Score: <b>${alert.score}</b><br>${alert.reason}`;
-    document.getElementById('alert-list').appendChild(el);
-}
+      checkAuthStatus() {
+        const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+        if (isLoggedIn) {
+          this.showDashboard();
+        } else {
+          this.showLogin();
+        }
+      },
 
-// Show explanation text
-function showExplanation(exp) {
-    document.getElementById('explanation-box').innerText = exp;
-}
+      setupEventListeners() {
+        // Navigation
+        document.querySelectorAll('.sidebar-nav-link').forEach(link => {
+          link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const section = link.getAttribute('data-section');
+            this.showSection(section);
+            this.setActiveNavItem(link);
+          });
+        });
 
-// Show synthetic scenario details
-function showSyntheticScenario(details) {
-    document.getElementById('synthetic-details').innerText = details;
-}
+        // Scenario filter
+        const scenarioFilter = document.getElementById('scenario-filter');
+        if (scenarioFilter) {
+          scenarioFilter.addEventListener('change', this.updateScenarioDetails);
+        }
 
-// Example simulated data for demo
-addTransaction({amount: '$1200', user: 'U123', device: 'Mobile', time: '12:41 PM'});
-addTransaction({amount: '$22', user: 'U889', device: 'Web', time: '12:43 PM'});
-addAlert({score: '0.87', reason: 'Unusual amount at late hour.'});
-showExplanation('Pattern deviates from user’s normal routine on weekday evenings. This would be normal if from their usual location.');
-showSyntheticScenario('Scenario: Fraud Type 1. Multiple high-value transfers detected from new device.');
+        // CSV File Input
+        const csvFileInput = document.getElementById('csvFileInput');
+        const csvDragDropArea = document.getElementById('csvDragDropArea');
 
-// Scenario filter change event
-document.getElementById('scenario-filter').addEventListener('change', function(e) {
-    const val = e.target.value;
-    if (val === 'normal') {
-        showSyntheticScenario('Normal transaction behavior observed.');
-    } else if (val === 'fraud-type-1') {
-        showSyntheticScenario('Scenario: Fraud Type 1. Multiple high-value transfers detected from new device.');
-    } else if (val === 'fraud-type-2') {
-        showSyntheticScenario('Scenario: Fraud Type 2. Suspicious frequency during late night hours.');
+        if (csvFileInput && csvDragDropArea) {
+          csvFileInput.addEventListener('change', (e) => this.handleCsvFile(e.target.files[0]));
+          csvDragDropArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            csvDragDropArea.style.borderColor = 'var(--primary)';
+          });
+          csvDragDropArea.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            csvDragDropArea.style.borderColor = 'var(--border)';
+          });
+          csvDragDropArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            csvDragDropArea.style.borderColor = 'var(--border)';
+            this.handleCsvFile(e.dataTransfer.files[0]);
+          });
+        }
+      },
+
+      showSection(sectionName) {
+        // Hide all content sections
+        document.querySelectorAll('.page-content').forEach(section => {
+          section.style.display = 'none';
+        });
+
+        // Show selected section
+        const targetSection = document.getElementById(${sectionName}-content);
+        if (targetSection) {
+          targetSection.style.display = 'block';
+        }
+
+        // Update page title and subtitle
+        const pageTitle = document.getElementById('page-title');
+        const pageSubtitle = document.getElementById('page-subtitle');
+        
+        const sectionConfig = {
+          dashboard: {
+            title: 'Dashboard Overview',
+            subtitle: 'Monitor your banking security in real-time'
+          },
+          alerts: {
+            title: 'Fraud Alerts',
+            subtitle: 'Manage and review security alerts and notifications'
+          },
+          transactions: {
+            title: 'Transaction History',
+            subtitle: 'View and analyze your transaction patterns'
+          },
+          scenarios: {
+            title: 'Synthetic Scenarios',
+            subtitle: 'Test fraud detection with simulated scenarios'
+          }
+        };
+
+        const config = sectionConfig[sectionName] || sectionConfig.dashboard;
+        pageTitle.textContent = config.title;
+        pageSubtitle.textContent = config.subtitle;
+      },
+
+      showLogin() {
+        document.getElementById('login-page').style.display = 'flex';
+        document.getElementById('dashboard-page').style.display = 'none';
+        document.getElementById('username').focus();
+      },
+
+      showDashboard() {
+        document.getElementById('login-page').style.display = 'none';
+        document.getElementById('dashboard-page').style.display = 'block';
+        this.isLoggedIn = true;
+        this.showSection('dashboard'); // Show default section
+        this.startLiveUpdates();
+        this.updateWelcomeMessage(); // New: Update welcome message
+      },
+
+      setActiveNavItem(activeLink) {
+        document.querySelectorAll('.sidebar-nav-link').forEach(link => {
+          link.classList.remove('active');
+        });
+        activeLink.classList.add('active');
+      },
+
+      updateWelcomeMessage() { // New method
+        const username = localStorage.getItem('username') || 'User';
+        document.getElementById('welcome-message').textContent = Hello, ${username}!;
+        document.querySelector('.user-avatar').textContent = username.charAt(0).toUpperCase();
+      },
+
+      updateScenarioDetails() {
+        const scenario = document.getElementById('scenario-filter').value;
+        const detailsDiv = document.getElementById('synthetic-details');
+        
+        const scenarios = {
+          'normal': 'Normal operations with standard transaction patterns and expected user behavior.',
+          'fraud-type-1': 'Card fraud simulation: Unusual spending patterns, geographic anomalies, and merchant category deviations.',
+          'fraud-type-2': 'Identity theft simulation: Multiple account access attempts, profile changes, and suspicious authentication patterns.',
+          'fraud-type-3': 'Account takeover simulation: Login from new devices, password changes, and unauthorized transaction attempts.'
+        };
+
+        detailsDiv.innerHTML = <p>${scenarios[scenario]}</p>;
+      },
+
+      updateTimestamp() {
+        const updateElement = document.getElementById('last-update');
+        if (updateElement) {
+          const now = new Date();
+          updateElement.textContent = now.toLocaleTimeString();
+        }
+      },
+
+      startLiveUpdates() {
+        // Update timestamp every 30 seconds
+        setInterval(() => {
+          this.updateTimestamp();
+        }, 30000);
+      },
+
+      handleCsvFile(file) {
+        const fileNameDisplay = document.getElementById('fileNameDisplay');
+        const csvDataDisplay = document.querySelector('#csvFileInput + label + div + p + .chart-placeholder');
+
+        if (!file) {
+          fileNameDisplay.textContent = 'No file selected.';
+          csvDataDisplay.innerHTML = '📊 Uploaded CSV data will be displayed here';
+          return;
+        }
+
+        fileNameDisplay.textContent = Selected file: ${file.name};
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const csvContent = e.target.result;
+          this.displayCsvOnDashboard(csvContent);
+        };
+        reader.readAsText(file);
+      },
+
+      displayCsvOnDashboard(csvString) {
+        const csvDataDisplay = document.querySelector('#csvFileInput + label + div + p + .chart-placeholder');
+        const lines = csvString.split('\n').filter(line => line.trim() !== '');
+        
+        if (lines.length === 0) {
+          csvDataDisplay.innerHTML = '<p style="color: var(--error);">Error: CSV file is empty.</p>';
+          return;
+        }
+
+        let html = '<div style="overflow-x: auto;"><table style="width: 100%; border-collapse: collapse; text-align: left;">';
+        
+        // Headers
+        html += '<thead><tr style="border-bottom: 1px solid var(--glass-border);">';
+        lines[0].split(',').forEach(header => {
+          html += <th style="padding: 0.75rem 0.5rem; color: var(--text-secondary);">${header.trim()}</th>;
+        });
+        html += '</tr></thead>';
+        
+        // Body
+        html += '<tbody>';
+        for (let i = 1; i < lines.length; i++) {
+          html += '<tr style="border-bottom: 1px solid var(--glass-border);">';
+          lines[i].split(',').forEach(cell => {
+            html += <td style="padding: 0.75rem 0.5rem;">${cell.trim()}</td>;
+          });
+          html += '</tr>';
+        }
+        html += '</tbody></table></div>';
+        
+        csvDataDisplay.innerHTML = html;
+      }
+    };
+
+    // Authentication Functions
+    function handleLogin(event) {
+      event.preventDefault();
+      
+      const form = document.querySelector('.login-container');
+      const loginBtn = document.getElementById('login-text');
+      const loadingSpinner = document.getElementById('login-loading');
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+
+      // Show loading state
+      loginBtn.style.display = 'none';
+      loadingSpinner.style.display = 'block';
+
+      // Simulate API call delay
+      setTimeout(() => {
+        const validCredentials = username === 'user123' && password === 'pass123';
+        
+        if (validCredentials) {
+          localStorage.setItem('isLoggedIn', 'true');
+          localStorage.setItem('username', username);
+          app.currentUser = username;
+          app.showDashboard();
+        } else {
+          // Reset button state
+          loginBtn.style.display = 'block';
+          loadingSpinner.style.display = 'none';
+          
+          // Show error
+          form.classList.add('shake');
+          setTimeout(() => form.classList.remove('shake'), 500);
+          
+          // Focus on username field
+          document.getElementById('username').focus();
+          document.getElementById('username').select();
+        }
+      }, 1000);
     }
-});
 
-const sidebar = document.getElementById('sidebar');
-        const body = document.body;
+    function handleLogout() {
+      if (confirm('Are you sure you want to sign out?')) {
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('username');
+        app.currentUser = null;
+        app.isLoggedIn = false;
+        app.showLogin();
+      }
+    }
 
-        sidebar.addEventListener('mouseenter', function() {
-            body.classList.add('sidebar-expanded');
-        });
+    function toggleSidebar() {
+      // On mobile, this can still be used for manual toggle
+      // On desktop, hover handles the interaction
+      const sidebar = document.getElementById('sidebar');
+      if (window.innerWidth <= 768) {
+        sidebar.classList.toggle('collapsed');
+      }
+    }
 
-        sidebar.addEventListener('mouseleave', function() {
-            body.classList.remove('sidebar-expanded');
-        });
+    // Initialize app when DOM is loaded
+    document.addEventListener('DOMContentLoaded', () => {
+      app.init();
+    });

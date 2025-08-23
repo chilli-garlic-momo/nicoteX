@@ -1,0 +1,5 @@
+backend/dataGen/*.csv
+backend/model/*.pkl
+backend/model/*.pth
+__pycache__/
+*.pyc
