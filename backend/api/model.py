@@ -121,8 +121,8 @@ def score_transactions(batch_txns):
 
         results.append({
             'txn_id': txn.get('txn_id', i),  # Use txn_id if available, else index
-            'anomaly_score': score,
-            'alert_flag': alert,
-            'explanation': explanation
+            'anomaly_score': float(score),  # Convert numpy.float32 to Python float
+            'alert_flag': bool(alert),  # Ensure boolean type
+            'explanation': str(explanation)  # Ensure string type
         })
     return results
