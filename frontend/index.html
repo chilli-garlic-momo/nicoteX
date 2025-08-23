@@ -5,8 +5,678 @@
   <title>Secure Banking Portal</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css">
-  <script src="script.js"></script>
+  <style>
+    :root {
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --secondary: #8b5cf6;
+      --background: #0f172a;
+      --surface: #1e293b;
+      --surface-light: #334155;
+      --text-primary: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --text-muted: #94a3b8;
+      --border: #475569;
+      --error: #ef4444;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --glass-bg: rgba(30, 41, 59, 0.8);
+      --glass-border: rgba(148, 163, 184, 0.1);
+      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25);
+      --shadow-lg: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body, html {
+      height: 100%;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, var(--background) 0%, #1e293b 50%, #334155 100%);
+      color: var(--text-primary);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* Animated background */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(circle at 25% 25%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 75% 75%, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    /* ================= UTILITIES ================= */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+
+    .glass {
+      background: var(--glass-bg);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+    }
+
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border-radius: 12px;
+      border: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+    }
+
+    .btn-danger {
+      background: var(--error);
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #dc2626;
+      transform: translateY(-1px);
+    }
+
+    /* ================= LOGIN PAGE ================= */
+    #login-page {
+      min-height: 100vh;
+      display: flex; /* Ensure login page is visible by default */
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .login-container {
+      width: 100%;
+      max-width: 420px;
+      padding: 2.5rem;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .login-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .login-header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--primary); /* Changed to solid primary color */
+      margin-bottom: 0.5rem;
+    }
+
+    .login-subtitle {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 1rem 3rem 1rem 1rem;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface);
+      color: var(--text-primary);
+      font-size: 1rem;
+      transition: all 0.2s ease;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    .input-icon {
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 20px;
+      height: 20px;
+      opacity: 0.6;
+    }
+
+    .login-actions {
+      margin-top: 2rem;
+    }
+
+    .login-btn {
+      width: 100%;
+      padding: 1rem;
+      font-size: 1rem;
+    }
+
+    .login-info {
+      margin-top: 1.5rem;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    /* Error states */
+    .shake {
+      animation: shake 0.5s ease-in-out;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-10px); }
+      75% { transform: translateX(10px); }
+    }
+
+    /* ================= DASHBOARD ================= */
+    #dashboard-page {
+      display: none; /* Ensure dashboard page is hidden by default */
+      min-height: 100vh;
+    }
+
+    .dashboard-layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 100px; /* Adjusted width for closed state */
+      background: var(--glass-bg);
+      backdrop-filter: blur(16px);
+      border-right: 1px solid var(--glass-border);
+      padding: 1.5rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      display: flex; /* Enable flexbox for sidebar */
+      flex-direction: column; /* Stack items vertically */
+    }
+
+    .sidebar:hover {
+      width: 280px;
+    }
+
+    .sidebar.collapsed {
+      width: 100px; /* Adjusted width for collapsed state */
+    }
+
+    .sidebar.collapsed:hover {
+      width: 280px;
+    }
+
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--glass-border);
+    }
+
+    .sidebar-footer .sidebar-nav-text {
+      opacity: 0; /* Hidden when sidebar is collapsed */
+      transform: translateX(-10px);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      white-space: nowrap;
+      position: absolute;
+    }
+
+    .sidebar:hover .sidebar-footer .sidebar-nav-text {
+      opacity: 1; /* Visible when sidebar is hovered */
+      transform: translateX(0);
+      position: static;
+    }
+
+    .sidebar-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      opacity: 0;
+      transform: translateX(-10px);
+      white-space: nowrap;
+      position: absolute;
+    }
+
+    .sidebar:hover .sidebar-title {
+      opacity: 1;
+      transform: translateX(0);
+      position: static;
+    }
+
+    .sidebar-logo {
+      width: 40px;
+      height: 40px;
+      opacity: 0; /* Hidden when sidebar is collapsed */
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: absolute;
+    }
+
+    .sidebar:hover .sidebar-logo {
+      opacity: 0;
+      position: absolute;
+    }
+
+    .sidebar-fd-logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-left: 0.5rem;
+      opacity: 1; /* Visible when sidebar is collapsed */
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: static;
+    }
+
+    .sidebar:hover .sidebar-fd-logo {
+      opacity: 0; /* Hidden when sidebar is hovered */
+      position: absolute;
+    }
+
+    .sidebar-toggle {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      padding: 0.5rem;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+      opacity: 1; /* Visible in collapsed state */
+      transform: translateX(0px); /* Position for collapsed state */
+      position: static;
+    }
+
+    .sidebar:hover .sidebar-toggle {
+      opacity: 0; /* Hidden when sidebar is hovered */
+      transform: translateX(10px);
+      position: absolute;
+    }
+
+    .sidebar-toggle:hover {
+      background: var(--surface-light);
+      color: var(--text-primary);
+    }
+
+    .sidebar-nav {
+      list-style: none;
+      flex-grow: 1; /* Allow navigation to take available space */
+    }
+
+    .sidebar-nav-item {
+      margin-bottom: 0.5rem;
+    }
+
+    .sidebar-nav-link {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      border-radius: 12px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .sidebar-nav-link:hover {
+      background: var(--surface-light);
+      color: var(--text-primary);
+    }
+
+    .sidebar-nav-link.active {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+    }
+
+    .sidebar-nav-icon {
+      width: 24px;
+      height: 24px;
+      flex-shrink: 0;
+      opacity: 1; /* Always visible in collapsed state */
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      filter: invert(1) brightness(1.5); /* Increased brightness for better visibility */
+      font-size: 1.5rem; /* For emoji icons */
+      display: flex; /* To center emoji */
+      align-items: center;
+      justify-content: center;
+    }
+
+    .sidebar:hover .sidebar-nav-icon {
+      opacity: 0;
+      transform: translateX(10px);
+    }
+
+    .sidebar-nav-link.active .sidebar-nav-icon {
+      opacity: 1;
+    }
+
+    .sidebar-nav-text {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      white-space: nowrap;
+      opacity: 0;
+      transform: translateX(-10px);
+      position: absolute;
+    }
+
+    .sidebar:hover .sidebar-nav-text {
+      opacity: 1;
+      transform: translateX(0);
+      position: static;
+    }
+
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      padding: 2rem;
+      overflow-y: auto;
+      margin-left: 0;
+      transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .main-header {
+      display: flex;
+      justify-content: flex-end; /* Align items to the right */
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--glass-border);
+      gap: 1rem; /* Add some space between items */
+    }
+
+    .header-left {
+      display: none; /* Hide header-left content */
+    }
+
+    .header-left h2 {
+      font-size: 1.75rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .header-subtitle {
+      color: var(--text-secondary);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem 1rem;
+      background: var(--surface);
+      border-radius: 12px;
+    }
+
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    /* Dashboard Grid */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .dashboard-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .dashboard-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+      border-color: rgba(99, 102, 241, 0.3);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: between;
+      margin-bottom: 1rem;
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .card-content {
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .status-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .status-success {
+      background: rgba(16, 185, 129, 0.2);
+      color: var(--success);
+    }
+
+    .status-warning {
+      background: rgba(245, 158, 11, 0.2);
+      color: var(--warning);
+    }
+
+    .status-error {
+      background: rgba(239, 68, 68, 0.2);
+      color: var(--error);
+    }
+
+    /* Charts placeholder */
+    .chart-placeholder {
+      height: 200px;
+      background: var(--surface);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      border: 2px dashed var(--border);
+      max-height: 300px; /* Set a max height */
+      overflow-y: auto; /* Enable vertical scrolling */
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .dashboard-layout {
+        flex-direction: column;
+      }
+
+      .sidebar {
+        width: 100% !important;
+        padding: 1rem;
+        position: relative;
+      }
+
+      .sidebar:hover {
+        width: 100% !important;
+      }
+
+      .sidebar-title {
+        opacity: 1 !important;
+        transform: translateX(0) !important;
+      }
+
+      .sidebar-nav-text {
+        opacity: 1 !important;
+        transform: translateX(0) !important;
+      }
+
+      .sidebar-toggle {
+        opacity: 1 !important;
+        transform: translateX(0) !important;
+      }
+
+      .main-content {
+        padding: 1rem;
+        margin-left: 0;
+      }
+
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .main-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .login-container {
+        padding: 1.5rem;
+      }
+
+      .login-header h1 {
+        font-size: 1.5rem;
+      }
+    }
+
+    /* Loading states */
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid var(--glass-border);
+      border-radius: 50%;
+      border-top-color: var(--primary);
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* CSV Upload Styles */
+    #csvDragDropArea {
+      transition: all 0.2s ease;
+    }
+
+    #csvDragDropArea.drag-over {
+      border-color: var(--primary) !important;
+      background: rgba(99, 102, 241, 0.1);
+    }
+
+    #csvDataDisplay table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    #csvDataDisplay th,
+    #csvDataDisplay td {
+      padding: 0.75rem 0.5rem;
+      border-bottom: 1px solid var(--glass-border);
+    }
+
+    #csvDataDisplay th {
+      color: var(--text-secondary);
+    }
+
+    .sidebar-footer {
+      margin-top: auto; /* Push to the bottom */
+      padding-top: 1rem;
+      border-top: 1px solid var(--glass-border);
+    }
+
+    .sidebar-footer .btn {
+      width: 100%;
+      justify-content: center; /* Center content of the button */
+      padding: 0.75rem 1rem; /* Adjust padding for better appearance */
+      text-align: center; /* Ensure text is centered */
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .sidebar-footer .btn .sidebar-nav-text {
+      opacity: 0;
+      transform: translateX(-10px);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      white-space: nowrap;
+      position: absolute;
+    }
+
+    .sidebar:hover .sidebar-footer .btn .sidebar-nav-text {
+      opacity: 1;
+      transform: translateX(0);
+      position: static;
+    }
+
+  </style>
 </head>
 <body>
   <!-- LOGIN PAGE -->
@@ -505,5 +1175,279 @@
       </main>
     </div>
   </div>
+
+  <script>
+    // Application State
+    const app = {
+  isLoggedIn: false,
+  currentUser: null,
+  
+  init() {
+    this.checkAuthStatus();
+    this.setupEventListeners();
+    this.updateTimestamp();
+  },
+
+  checkAuthStatus() {
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+    if (isLoggedIn) {
+      this.showDashboard();
+    } else {
+      this.showLogin();
+    }
+  },
+
+  setupEventListeners() {
+    // Navigation
+    document.querySelectorAll('.sidebar-nav-link').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const section = link.getAttribute('data-section');
+        this.showSection(section);
+        this.setActiveNavItem(link);
+      });
+    });
+
+    // Scenario filter
+    const scenarioFilter = document.getElementById('scenario-filter');
+    if (scenarioFilter) {
+      scenarioFilter.addEventListener('change', (e) => this.updateScenarioDetails());
+      // or: scenarioFilter.addEventListener('change', this.updateScenarioDetails.bind(this));
+    }
+
+    // CSV File Input
+    const csvFileInput = document.getElementById('csvFileInput');
+    const csvDragDropArea = document.getElementById('csvDragDropArea');
+
+    if (csvFileInput && csvDragDropArea) {
+      csvFileInput.addEventListener('change', (e) => this.handleCsvFile(e.target.files[0]));
+      csvDragDropArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        csvDragDropArea.style.borderColor = 'var(--primary)';
+      });
+      csvDragDropArea.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        csvDragDropArea.style.borderColor = 'var(--border)';
+      });
+      csvDragDropArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        csvDragDropArea.style.borderColor = 'var(--border)';
+        this.handleCsvFile(e.dataTransfer.files);
+      });
+    }
+  },
+
+  showSection(sectionName) {
+    // Hide all content sections
+    document.querySelectorAll('.page-content').forEach(section => {
+      section.style.display = 'none';
+    });
+
+    // Show selected section
+    const targetSection = document.getElementById(`${sectionName}-content`);
+    if (targetSection) {
+      targetSection.style.display = 'block';
+    }
+
+    // Update page title and subtitle
+    const pageTitle = document.getElementById('page-title');
+    const pageSubtitle = document.getElementById('page-subtitle');
+
+    const sectionConfig = {
+      dashboard: {
+        title: 'Dashboard Overview',
+        subtitle: 'Monitor your banking security in real-time'
+      },
+      alerts: {
+        title: 'Fraud Alerts',
+        subtitle: 'Manage and review security alerts and notifications'
+      },
+      transactions: {
+        title: 'Transaction History',
+        subtitle: 'View and analyze your transaction patterns'
+      },
+      scenarios: {
+        title: 'Synthetic Scenarios',
+        subtitle: 'Test fraud detection with simulated scenarios'
+      }
+    };
+
+    const config = sectionConfig[sectionName] || sectionConfig.dashboard;
+    pageTitle.textContent = config.title;
+    pageSubtitle.textContent = config.subtitle;
+  },
+
+  showLogin() {
+    document.getElementById('login-page').style.display = 'flex';
+    document.getElementById('dashboard-page').style.display = 'none';
+    document.getElementById('username').focus();
+  },
+
+  showDashboard() {
+    document.getElementById('login-page').style.display = 'none';
+    document.getElementById('dashboard-page').style.display = 'block';
+    this.isLoggedIn = true;
+    this.showSection('dashboard'); // Show default section
+    this.startLiveUpdates();
+    this.updateWelcomeMessage(); // New: Update welcome message
+  },
+
+  setActiveNavItem(activeLink) {
+    document.querySelectorAll('.sidebar-nav-link').forEach(link => {
+      link.classList.remove('active');
+    });
+    activeLink.classList.add('active');
+  },
+
+  updateWelcomeMessage() { // New method
+    const username = localStorage.getItem('username') || 'User';
+    document.getElementById('welcome-message').textContent = `Hello, ${username}!`;
+    document.querySelector('.user-avatar').textContent = username.charAt(0).toUpperCase();
+  },
+
+  updateScenarioDetails() {
+    const scenario = document.getElementById('scenario-filter').value;
+    const detailsDiv = document.getElementById('synthetic-details');
+    
+    const scenarios = {
+      'normal': 'Normal operations with standard transaction patterns and expected user behavior.',
+      'fraud-type-1': 'Card fraud simulation: Unusual spending patterns, geographic anomalies, and merchant category deviations.',
+      'fraud-type-2': 'Identity theft simulation: Multiple account access attempts, profile changes, and suspicious authentication patterns.',
+      'fraud-type-3': 'Account takeover simulation: Login from new devices, password changes, and unauthorized transaction attempts.'
+    };
+
+    detailsDiv.innerHTML = `<p>${scenarios[scenario]}</p>`;
+  },
+
+  updateTimestamp() {
+    const updateElement = document.getElementById('last-update');
+    if (updateElement) {
+      const now = new Date();
+      updateElement.textContent = now.toLocaleTimeString();
+    }
+  },
+
+  startLiveUpdates() {
+    // Update timestamp every 30 seconds
+    setInterval(() => {
+      this.updateTimestamp();
+    }, 30000);
+  },
+
+  handleCsvFile(file) {
+    const fileNameDisplay = document.getElementById('fileNameDisplay');
+    const csvDataDisplay = document.querySelector('#csvFileInput + label + div + p + .chart-placeholder');
+
+    if (!file) {
+      fileNameDisplay.textContent = 'No file selected.';
+      csvDataDisplay.innerHTML = '📊 Uploaded CSV data will be displayed here';
+      return;
+    }
+
+    fileNameDisplay.textContent = `Selected file: ${file.name}`;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const csvContent = e.target.result;
+      this.displayCsvOnDashboard(csvContent);
+    };
+    reader.readAsText(file);
+  },
+
+  displayCsvOnDashboard(csvString) {
+    const csvDataDisplay = document.querySelector('#csvFileInput + label + div + p + .chart-placeholder');
+    const lines = csvString.split('\n').filter(line => line.trim() !== '');
+    
+    if (lines.length === 0) {
+      csvDataDisplay.innerHTML = '<p style="color: var(--error);">Error: CSV file is empty.</p>';
+      return;
+    }
+
+    let html = '<div style="overflow-x: auto;"><table style="width: 100%; border-collapse: collapse; text-align: left;">';
+
+    // Headers
+    html += '<thead><tr style="border-bottom: 1px solid var(--glass-border);">';
+    lines[0].split(',').forEach(header => {
+      html += `<th style="padding: 0.75rem 0.5rem; color: var(--text-secondary);">${header.trim()}</th>`;
+    });
+    html += '</tr></thead>';
+    
+    // Body
+    html += '<tbody>';
+    for (let i = 1; i < lines.length; i++) {
+      html += '<tr style="border-bottom: 1px solid var(--glass-border);">';
+      lines[i].split(',').forEach(cell => {
+        html += `<td style="padding: 0.75rem 0.5rem;">${cell.trim()}</td>`;
+      });
+      html += '</tr>';
+    }
+    html += '</tbody></table></div>';
+    
+    csvDataDisplay.innerHTML = html;
+  }
+};
+
+// Authentication Functions
+function handleLogin(event) {
+  event.preventDefault();
+  
+  const form = document.querySelector('.login-container');
+  const loginBtn = document.getElementById('login-text');
+  const loadingSpinner = document.getElementById('login-loading');
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value;
+
+  // Show loading state
+  loginBtn.style.display = 'none';
+  loadingSpinner.style.display = 'block';
+
+  // Simulate API call delay
+  setTimeout(() => {
+    const validCredentials = username === 'user123' && password === 'pass123';
+    
+    if (validCredentials) {
+      localStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem('username', username);
+      app.currentUser = username;
+      app.showDashboard();
+    } else {
+      // Reset button state
+      loginBtn.style.display = 'block';
+      loadingSpinner.style.display = 'none';
+      
+      // Show error
+      form.classList.add('shake');
+      setTimeout(() => form.classList.remove('shake'), 500);
+      
+      // Focus on username field
+      document.getElementById('username').focus();
+      document.getElementById('username').select();
+    }
+  }, 1000);
+}
+
+function handleLogout() {
+  if (confirm('Are you sure you want to sign out?')) {
+    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('username');
+    app.currentUser = null;
+    app.isLoggedIn = false;
+    app.showLogin();
+  }
+}
+
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  if (window.innerWidth <= 768) {
+    sidebar.classList.toggle('collapsed');
+  }
+}
+
+// Initialize app when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  app.init();
+});
+
+  </script>
 </body>
 </html>
