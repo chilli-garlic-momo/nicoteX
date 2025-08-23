@@ -11,6 +11,8 @@ from explainability.explaination import generate_explanation
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_DIR = os.path.join(BASE_DIR, '..', 'model')
 
+
+
 # Load preprocessing artifacts with correct paths
 enc_path = os.path.join(MODEL_DIR, 'onehot.pkl')
 scaler_path = os.path.join(MODEL_DIR, 'scaler.pkl')
@@ -41,16 +43,21 @@ def load_model():
     """
     global model
     if model is None:
-        # Determine input dimension from encoder output + 1 numeric feature
-        input_dim = scaler.transform(np.array([[0]])).shape[1] + enc.transform(
-            [['Mumbai', 'android', 'Cafe']]
-        ).shape[1]
+        try:
+            # Determine input dimension from encoder output + 1 numeric feature
+            input_dim = scaler.transform(np.array([[0]])).shape[1] + enc.transform(
+                [['Mumbai', 'android', 'Cafe']]
+            ).shape[1]
 
-        model_inst = Autoencoder(input_dim)
-        model_path = os.path.join(MODEL_DIR, 'autoencoder.pth')
-        model_inst.load_state_dict(torch.load(model_path, map_location='cpu'))
-        model_inst.eval()
-        model = model_inst
+            model_inst = Autoencoder(input_dim)
+            model_path = os.path.join(MODEL_DIR, 'autoencoder.pth')
+            model_inst.load_state_dict(torch.load(model_path, map_location='cpu'))
+            model_inst.eval()
+            model = model_inst
+            print(f"Model loaded successfully with input dimension: {input_dim}")
+        except Exception as e:
+            print(f"Error loading model: {e}")
+            raise e
     return model
 
 
