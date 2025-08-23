@@ -23,16 +23,18 @@ app.add_middleware(
 async def score_endpoint(request: Request):
     try:
         txn = await request.json()
-        score, alert = score_transactions(txn)
-        explanation = "Transaction flagged due to high reconstruction error from normal pattern."
-        if alert:
-            add_alert(txn, score)
-            explanation += " Likely reasons: unusual device/location/amount/timing."
-        return {
-            "anomaly_score": score,
-            "alert_flag": alert,
-            "explanation": explanation
-        }
+        results = score_transactions(txn)
+        if results:
+            result = results[0]  # Get the first (and only) result
+            if result['alert_flag']:
+                add_alert(txn, result['anomaly_score'])
+            return {
+                "anomaly_score": result['anomaly_score'],
+                "alert_flag": result['alert_flag'],
+                "explanation": result['explanation']
+            }
+        else:
+            raise HTTPException(status_code=400, detail="No results returned from model")
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error processing transaction: {str(e)}")
 

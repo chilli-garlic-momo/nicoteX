@@ -71,6 +71,10 @@ def score_transactions(batch_txns):
                       - alert_flag (bool)
                       - explanation (str)
     """
+    # Ensure batch_txns is a list
+    if not isinstance(batch_txns, list):
+        batch_txns = [batch_txns]
+    
     df = pd.DataFrame(batch_txns)
 
     # Ensure timestamp is datetime
