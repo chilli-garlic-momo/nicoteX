@@ -804,9 +804,14 @@
               </div>
               <div class="card-content">
                 <input type="file" id="csvFileInput" accept=".csv" style="display: none;"/>
-                <label for="csvFileInput" class="btn btn-primary" style="margin-bottom: 1rem; display: block; text-align: center;">
-                  Choose CSV File
-                </label>
+                <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                  <label for="csvFileInput" class="btn btn-primary" style="flex: 1; text-align: center;">
+                    Choose CSV File
+                  </label>
+                  <button type="button" class="btn" style="background: var(--surface); color: var(--text-primary); border: 1px solid var(--border);" onclick="app.downloadTemplate()">
+                    📋 Template
+                  </button>
+                </div>
                 <div id="csvDragDropArea" style="border: 2px dashed var(--border); border-radius: 12px; padding: 2rem; text-align: center; color: var(--text-muted);">
                   Drag & Drop CSV File Here
                 </div>
@@ -833,7 +838,7 @@
             <div class="dashboard-card">
               <div class="card-header">
                 <h3 class="card-title">Fraud Alerts</h3>
-                <span class="status-indicator status-success">●  Clear</span>
+                <span class="status-indicator status-success" id="alert-status">●  Clear</span>
               </div>
               <div class="card-content" id="alert-list">
                 <p>No suspicious activity detected</p>
@@ -857,7 +862,7 @@
               <div class="card-header">
                 <h3 class="card-title">Transaction Statistics</h3>
               </div>
-              <div class="card-content">
+              <div class="card-content" id="transaction-statistics">
                 <div class="chart-placeholder">
                   📊 Interactive charts will be displayed here
                 </div>
@@ -1181,11 +1186,13 @@
     const app = {
   isLoggedIn: false,
   currentUser: null,
+  apiBaseUrl: 'http://localhost:8000', // Backend API URL
   
   init() {
     this.checkAuthStatus();
     this.setupEventListeners();
     this.updateTimestamp();
+    this.checkBackendHealth();
   },
 
   checkAuthStatus() {
@@ -1334,7 +1341,7 @@
     }, 30000);
   },
 
-  handleCsvFile(file) {
+  async handleCsvFile(file) {
     const fileNameDisplay = document.getElementById('fileNameDisplay');
     const csvDataDisplay = document.querySelector('#csvFileInput + label + div + p + .chart-placeholder');
 
@@ -1345,45 +1352,406 @@
     }
 
     fileNameDisplay.textContent = `Selected file: ${file.name}`;
+    
+    // Show loading state
+    csvDataDisplay.innerHTML = '<div style="text-align: center; padding: 2rem;"><div class="loading" style="margin: 0 auto 1rem;"></div><p>Processing CSV file...</p></div>';
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const csvContent = e.target.result;
-      this.displayCsvOnDashboard(csvContent);
-    };
-    reader.readAsText(file);
+    try {
+      // Create FormData for file upload
+      const formData = new FormData();
+      formData.append('file', file);
+
+      // Send to backend API
+      const response = await fetch(`${this.apiBaseUrl}/transactions/batch`, {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to process CSV file');
+      }
+
+      const result = await response.json();
+      
+      // Display results in CSV upload area
+      this.displayFraudAnalysisResults(result, file);
+      
+      // Update all dashboard sections with ML results
+      this.updateFraudAlerts(result);
+      this.updateTransactionStats(result);
+      this.updateRiskAnalysis(result);
+      this.updateRecentTransactions(result);
+      this.updateTransactionStatistics(result);
+      
+    } catch (error) {
+      console.error('Error processing CSV:', error);
+      csvDataDisplay.innerHTML = `<div style="color: var(--error); text-align: center; padding: 2rem;">
+        <p>❌ Error processing file: ${error.message}</p>
+        <p style="font-size: 0.9rem; margin-top: 1rem;">Please ensure your CSV has the required columns: user_id, amount, location, device, merchant, timestamp</p>
+      </div>`;
+    }
   },
 
-  displayCsvOnDashboard(csvString) {
+  displayFraudAnalysisResults(result, file) {
     const csvDataDisplay = document.querySelector('#csvFileInput + label + div + p + .chart-placeholder');
-    const lines = csvString.split('\n').filter(line => line.trim() !== '');
     
-    if (lines.length === 0) {
-      csvDataDisplay.innerHTML = '<p style="color: var(--error);">Error: CSV file is empty.</p>';
-      return;
-    }
-
-    let html = '<div style="overflow-x: auto;"><table style="width: 100%; border-collapse: collapse; text-align: left;">';
-
-    // Headers
-    html += '<thead><tr style="border-bottom: 1px solid var(--glass-border);">';
-    lines[0].split(',').forEach(header => {
-      html += `<th style="padding: 0.75rem 0.5rem; color: var(--text-secondary);">${header.trim()}</th>`;
-    });
-    html += '</tr></thead>';
+    let html = '<div style="overflow-x: auto;">';
     
-    // Body
-    html += '<tbody>';
-    for (let i = 1; i < lines.length; i++) {
-      html += '<tr style="border-bottom: 1px solid var(--glass-border);">';
-      lines[i].split(',').forEach(cell => {
-        html += `<td style="padding: 0.75rem 0.5rem;">${cell.trim()}</td>`;
+    // Summary statistics
+    html += `<div style="margin-bottom: 1.5rem; padding: 1rem; background: var(--surface); border-radius: 8px;">
+      <h4 style="margin-bottom: 1rem; color: var(--primary);">📊 Analysis Summary</h4>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+        <div style="text-align: center;">
+          <div style="font-size: 1.5rem; font-weight: 600; color: var(--text-primary);">${result.total_transactions}</div>
+          <div style="font-size: 0.9rem; color: var(--text-secondary);">Total Transactions</div>
+        </div>
+        <div style="text-align: center;">
+          <div style="font-size: 1.5rem; font-weight: 600; color: var(--error);">${result.fraudulent_transactions}</div>
+          <div style="font-size: 0.9rem; color: var(--text-secondary);">Fraudulent Detected</div>
+        </div>
+        <div style="text-align: center;">
+          <div style="font-size: 1.5rem; font-weight: 600; color: var(--success);">${result.total_transactions - result.fraudulent_transactions}</div>
+          <div style="font-size: 0.9rem; color: var(--text-secondary);">Legitimate</div>
+        </div>
+        <div style="text-align: center;">
+          <div style="font-size: 1.5rem; font-weight: 600; color: var(--warning);">${((result.fraudulent_transactions / result.total_transactions) * 100).toFixed(1)}%</div>
+          <div style="font-size: 0.9rem; color: var(--text-secondary);">Fraud Rate</div>
+        </div>
+      </div>
+    </div>`;
+    
+    // Fraudulent transactions table
+    const fraudulentTxns = result.results.filter(r => r.alert_flag);
+    if (fraudulentTxns.length > 0) {
+      html += `<div style="margin-bottom: 1.5rem;">
+        <h4 style="margin-bottom: 1rem; color: var(--error);">🚨 Fraudulent Transactions Detected</h4>
+        <table style="width: 100%; border-collapse: collapse; text-align: left; background: var(--surface); border-radius: 8px; overflow: hidden;">
+          <thead>
+            <tr style="background: var(--surface-light);">
+              <th style="padding: 0.75rem; color: var(--text-secondary);">Transaction ID</th>
+              <th style="padding: 0.75rem; color: var(--text-secondary);">Anomaly Score</th>
+              <th style="padding: 0.75rem; color: var(--text-secondary);">Explanation</th>
+            </tr>
+          </thead>
+          <tbody>`;
+      
+      fraudulentTxns.forEach(txn => {
+        html += `<tr style="border-bottom: 1px solid var(--glass-border);">
+          <td style="padding: 0.75rem; font-weight: 600;">${txn.txn_id}</td>
+          <td style="padding: 0.75rem;">
+            <span style="color: var(--error); font-weight: 600;">${txn.anomaly_score.toFixed(3)}</span>
+          </td>
+          <td style="padding: 0.75rem; font-size: 0.9rem; color: var(--text-secondary);">${txn.explanation}</td>
+        </tr>`;
       });
-      html += '</tr>';
+      
+      html += '</tbody></table></div>';
     }
-    html += '</tbody></table></div>';
     
+    // All transactions table (collapsible)
+    html += `<div>
+      <details style="margin-bottom: 1rem;">
+        <summary style="cursor: pointer; padding: 0.5rem; background: var(--surface); border-radius: 8px; margin-bottom: 0.5rem;">
+          <span style="color: var(--primary); font-weight: 600;">📋 View All Transactions (${result.results.length})</span>
+        </summary>
+        <table style="width: 100%; border-collapse: collapse; text-align: left; background: var(--surface); border-radius: 8px; overflow: hidden;">
+          <thead>
+            <tr style="background: var(--surface-light);">
+              <th style="padding: 0.75rem; color: var(--text-secondary);">Transaction ID</th>
+              <th style="padding: 0.75rem; color: var(--text-secondary);">Anomaly Score</th>
+              <th style="padding: 0.75rem; color: var(--text-secondary);">Status</th>
+              <th style="padding: 0.75rem; color: var(--text-secondary);">Explanation</th>
+            </tr>
+          </thead>
+          <tbody>`;
+      
+      result.results.forEach(txn => {
+        const statusColor = txn.alert_flag ? 'var(--error)' : 'var(--success)';
+        const statusText = txn.alert_flag ? '🚨 Fraudulent' : '✅ Legitimate';
+        
+        html += `<tr style="border-bottom: 1px solid var(--glass-border);">
+          <td style="padding: 0.75rem; font-weight: 600;">${txn.txn_id}</td>
+          <td style="padding: 0.75rem;">
+            <span style="color: ${statusColor}; font-weight: 600;">${txn.anomaly_score.toFixed(3)}</span>
+          </td>
+          <td style="padding: 0.75rem;">
+            <span style="color: ${statusColor}; font-weight: 600;">${statusText}</span>
+          </td>
+          <td style="padding: 0.75rem; font-size: 0.9rem; color: var(--text-secondary);">${txn.explanation}</td>
+        </tr>`;
+      });
+      
+      html += '</tbody></table></details></div>';
+    
+    html += '</div>';
     csvDataDisplay.innerHTML = html;
+  },
+
+  updateFraudAlerts(result) {
+    const alertList = document.getElementById('alert-list');
+    const alertStatus = document.getElementById('alert-status');
+    const fraudulentCount = result.fraudulent_transactions;
+    
+    // Update alert status indicator
+    if (fraudulentCount > 0) {
+      alertStatus.textContent = `●  ${fraudulentCount} Alert${fraudulentCount > 1 ? 's' : ''}`;
+      alertStatus.className = 'status-indicator status-error';
+    } else {
+      alertStatus.textContent = '●  Clear';
+      alertStatus.className = 'status-indicator status-success';
+    }
+    
+    if (fraudulentCount > 0) {
+      const fraudulentTxns = result.results.filter(r => r.alert_flag);
+      let html = `<div style="margin-bottom: 1rem;">
+        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+          <span style="color: var(--error);">🚨</span>
+          <strong>${fraudulentCount} Fraudulent Transaction${fraudulentCount > 1 ? 's' : ''} Detected</strong>
+        </div>`;
+      
+      fraudulentTxns.slice(0, 3).forEach(txn => {
+        html += `<div style="padding: 0.75rem; background: var(--surface); border-radius: 8px; margin-bottom: 0.5rem; border-left: 4px solid var(--error);">
+          <div style="font-weight: 600; margin-bottom: 0.25rem;">Transaction ID: ${txn.txn_id}</div>
+          <div style="font-size: 0.9rem; color: var(--text-secondary);">Risk Score: ${txn.anomaly_score.toFixed(3)}</div>
+          <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem;">${txn.explanation}</div>
+        </div>`;
+      });
+      
+      if (fraudulentCount > 3) {
+        html += `<div style="font-size: 0.9rem; color: var(--text-muted);">... and ${fraudulentCount - 3} more</div>`;
+      }
+      
+      html += '</div>';
+      alertList.innerHTML = html;
+    } else {
+      alertList.innerHTML = `<p>✅ No suspicious activity detected</p>
+        <p style="margin-top: 0.5rem; color: var(--text-muted); font-size: 0.9rem;">
+          All ${result.total_transactions} transactions analyzed successfully
+        </p>`;
+    }
+  },
+
+  updateTransactionStats(result) {
+    const transactionStream = document.getElementById('transaction-stream');
+    const legitimateCount = result.total_transactions - result.fraudulent_transactions;
+    
+    // Calculate additional statistics
+    const avgScore = result.results.reduce((sum, txn) => sum + txn.anomaly_score, 0) / result.total_transactions;
+    const highRiskCount = result.results.filter(txn => txn.anomaly_score > 0.5).length;
+    const mediumRiskCount = result.results.filter(txn => txn.anomaly_score > 0.25 && txn.anomaly_score <= 0.5).length;
+    
+    transactionStream.innerHTML = `
+      <div style="margin-bottom: 1rem;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+          <span>Total Processed:</span>
+          <span style="font-weight: 600;">${result.total_transactions} transactions</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+          <span>✅ Legitimate:</span>
+          <span style="color: var(--success); font-weight: 600;">${legitimateCount}</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+          <span>🚨 Fraudulent:</span>
+          <span style="color: var(--error); font-weight: 600;">${result.fraudulent_transactions}</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+          <span>⚠️ High Risk:</span>
+          <span style="color: var(--warning); font-weight: 600;">${highRiskCount}</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+          <span>📊 Avg Risk Score:</span>
+          <span style="font-weight: 600;">${avgScore.toFixed(3)}</span>
+        </div>
+      </div>
+      <p style="margin-top: 0.5rem; color: var(--text-muted); font-size: 0.9rem;">
+        Last update: <span id="last-update">Just now</span>
+      </p>
+    `;
+  },
+
+  updateRecentTransactions(result) {
+    const transactionStream = document.getElementById('transaction-stream');
+    
+    // Get the most recent transactions (last 5)
+    const recentTxns = result.results.slice(-5).reverse();
+    
+    let html = `<div style="margin-bottom: 1rem;">`;
+    
+    recentTxns.forEach(txn => {
+      const statusIcon = txn.alert_flag ? '🚨' : '✅';
+      const statusColor = txn.alert_flag ? 'var(--error)' : 'var(--success)';
+      const riskLevel = txn.anomaly_score > 0.5 ? 'High' : txn.anomaly_score > 0.25 ? 'Medium' : 'Low';
+      
+      html += `<div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid var(--glass-border);">
+        <div style="flex: 1;">
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <span style="color: ${statusColor};">${statusIcon}</span>
+            <span style="font-weight: 600;">TXN-${txn.txn_id}</span>
+          </div>
+          <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.25rem;">
+            Risk: ${riskLevel} (${txn.anomaly_score.toFixed(3)})
+          </div>
+        </div>
+        <div style="text-align: right;">
+          <div style="font-size: 0.9rem; color: ${statusColor}; font-weight: 600;">
+            ${txn.alert_flag ? 'Fraudulent' : 'Legitimate'}
+          </div>
+        </div>
+      </div>`;
+    });
+    
+    html += `</div>
+      <p style="margin-top: 0.5rem; color: var(--text-muted); font-size: 0.9rem;">
+        Last update: <span id="last-update">Just now</span>
+      </p>`;
+    
+    transactionStream.innerHTML = html;
+  },
+
+  updateTransactionStatistics(result) {
+    const transactionStats = document.getElementById('transaction-statistics');
+    const totalCount = result.total_transactions;
+    const fraudulentCount = result.fraudulent_transactions;
+    const legitimateCount = totalCount - fraudulentCount;
+    
+    // Calculate risk distribution
+    const highRisk = result.results.filter(txn => txn.anomaly_score > 0.5).length;
+    const mediumRisk = result.results.filter(txn => txn.anomaly_score > 0.25 && txn.anomaly_score <= 0.5).length;
+    const lowRisk = result.results.filter(txn => txn.anomaly_score <= 0.25).length;
+    
+    // Calculate percentages for visual bars
+    const highRiskPercent = (highRisk / totalCount) * 100;
+    const mediumRiskPercent = (mediumRisk / totalCount) * 100;
+    const lowRiskPercent = (lowRisk / totalCount) * 100;
+    
+    let html = `<div style="margin-bottom: 1.5rem;">
+      <h4 style="margin-bottom: 1rem; color: var(--primary);">📊 Risk Distribution</h4>
+      
+      <div style="margin-bottom: 1rem;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+          <span>High Risk (Score > 0.5)</span>
+          <span style="color: var(--error); font-weight: 600;">${highRisk} (${highRiskPercent.toFixed(1)}%)</span>
+        </div>
+        <div style="background: var(--surface); border-radius: 4px; height: 8px; overflow: hidden;">
+          <div style="background: var(--error); height: 100%; width: ${highRiskPercent}%; transition: width 0.3s ease;"></div>
+        </div>
+      </div>
+      
+      <div style="margin-bottom: 1rem;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+          <span>Medium Risk (0.25-0.5)</span>
+          <span style="color: var(--warning); font-weight: 600;">${mediumRisk} (${mediumRiskPercent.toFixed(1)}%)</span>
+        </div>
+        <div style="background: var(--surface); border-radius: 4px; height: 8px; overflow: hidden;">
+          <div style="background: var(--warning); height: 100%; width: ${mediumRiskPercent}%; transition: width 0.3s ease;"></div>
+        </div>
+      </div>
+      
+      <div style="margin-bottom: 1rem;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+          <span>Low Risk (≤ 0.25)</span>
+          <span style="color: var(--success); font-weight: 600;">${lowRisk} (${lowRiskPercent.toFixed(1)}%)</span>
+        </div>
+        <div style="background: var(--surface); border-radius: 4px; height: 8px; overflow: hidden;">
+          <div style="background: var(--success); height: 100%; width: ${lowRiskPercent}%; transition: width 0.3s ease;"></div>
+        </div>
+      </div>
+    </div>
+    
+    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+      <div style="text-align: center; padding: 1rem; background: var(--surface); border-radius: 8px;">
+        <div style="font-size: 1.5rem; font-weight: 600; color: var(--success);">${legitimateCount}</div>
+        <div style="font-size: 0.9rem; color: var(--text-secondary);">Legitimate</div>
+      </div>
+      <div style="text-align: center; padding: 1rem; background: var(--surface); border-radius: 8px;">
+        <div style="font-size: 1.5rem; font-weight: 600; color: var(--error);">${fraudulentCount}</div>
+        <div style="font-size: 0.9rem; color: var(--text-secondary);">Fraudulent</div>
+      </div>
+    </div>`;
+    
+    transactionStats.innerHTML = html;
+  },
+
+  updateRiskAnalysis(result) {
+    const explanationBox = document.getElementById('explanation-box');
+    const fraudulentCount = result.fraudulent_transactions;
+    const totalCount = result.total_transactions;
+    const fraudRate = ((fraudulentCount / totalCount) * 100).toFixed(1);
+    
+    // Get unique risk factors from explanations
+    const riskFactors = new Set();
+    result.results.forEach(txn => {
+      if (txn.explanation) {
+        const factors = txn.explanation.split('.').filter(f => f.trim());
+        factors.forEach(factor => riskFactors.add(factor.trim()));
+      }
+    });
+    
+    let html = `<div style="margin-bottom: 1rem;">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+        <span>Overall Fraud Rate:</span>
+        <span style="color: ${fraudulentCount > 0 ? 'var(--error)' : 'var(--success)'}; font-weight: 600;">${fraudRate}%</span>
+      </div>
+      <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+        <span>Risk Level:</span>
+        <span style="color: ${fraudRate > 10 ? 'var(--error)' : fraudRate > 5 ? 'var(--warning)' : 'var(--success)'}; font-weight: 600;">
+          ${fraudRate > 10 ? '🔴 High' : fraudRate > 5 ? '🟡 Medium' : '🟢 Low'}
+        </span>
+      </div>
+    </div>`;
+    
+    if (riskFactors.size > 0) {
+      html += `<div style="margin-bottom: 1rem;">
+        <h4 style="margin-bottom: 0.5rem; color: var(--primary);">🔍 Detected Risk Factors:</h4>
+        <ul style="margin-left: 1rem; color: var(--text-secondary);">`;
+      
+      Array.from(riskFactors).slice(0, 5).forEach(factor => {
+        html += `<li style="margin-bottom: 0.25rem;">${factor}</li>`;
+      });
+      
+      html += `</ul></div>`;
+    }
+    
+    html += `<p style="color: var(--text-secondary); font-size: 0.9rem;">
+      Advanced fraud detection algorithms analyzed ${totalCount} transactions using machine learning patterns including amount analysis, location verification, device authentication, and temporal behavior patterns.
+    </p>`;
+    
+    explanationBox.innerHTML = html;
+  },
+
+  async checkBackendHealth() {
+    try {
+      const response = await fetch(`${this.apiBaseUrl}/health`);
+      if (response.ok) {
+        console.log('Backend API is healthy');
+      } else {
+        console.warn('Backend API health check failed');
+      }
+    } catch (error) {
+      console.warn('Backend API not available:', error.message);
+    }
+  },
+
+  downloadTemplate() {
+    // Create sample CSV content
+    const csvContent = `user_id,amount,location,device,merchant,timestamp
+user_1,1500.50,Mumbai,android,Cafe,2024-01-15 14:30:00
+user_2,2500.75,Delhi,ios,Grocery,2024-01-15 15:45:00
+user_3,800.25,Bangalore,web,Electronics,2024-01-15 16:20:00
+user_1,3200.00,Mumbai,android,Online Store,2024-01-15 17:10:00
+user_2,450.80,Delhi,ios,Cafe,2024-01-15 18:30:00`;
+
+    // Create and download file
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'transaction_template.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
   }
 };
 

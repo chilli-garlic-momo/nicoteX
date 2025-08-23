@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 from model.autoEncoder import Autoencoder
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
-from backend.explainability.explaination import generate_explanation
+from explainability.explaination import generate_explanation
 
 # Paths for model and preprocessors relative to this file
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))

@@ -1,5 +1,10 @@
-# run everything from the main directory
-pip install pandas numpy torch scikit-learn fastapi uvicorn requests
+pandas
+numpy
+torch
+scikit-learn
+fastapi
+uvicorn
+requests
 
 python backend/dataGennormal.py         # creates normalTransactions.csv
 python backend/dataGenfraudPatterns.py  # injects frauds, creates syntheticTransactions.csv
