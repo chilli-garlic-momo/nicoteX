@@ -6,6 +6,7 @@ from api.alerts import add_alert, get_alerts
 
 app = FastAPI()
 
+# Single transaction scoring endpoint
 @app.post("/transaction")
 async def score_endpoint(request: Request):
     txn = await request.json()
@@ -20,25 +21,31 @@ async def score_endpoint(request: Request):
         "explanation": explanation
     }
 
+# Batch transactions scoring endpoint
 @app.post("/transactions/batch")
 async def score_batch_endpoint(file: UploadFile = File(...)):
-    """
-    Endpoint to receive a CSV file with multiple transactions, score them, and return results.
-    """
     content = await file.read()
-    df = pd.read_csv(io.BytesIO(content))
+    try:
+        df = pd.read_csv(io.BytesIO(content))
+    except Exception as e:
+        return {"error": f"Failed to parse CSV: {str(e)}"}
 
-    # Expect columns like user_id, amount, location, device, merchant, timestamp, txn_id (optional)
+    # Validate required columns
+    required = {'user_id', 'amount', 'location', 'device', 'merchant', 'timestamp'}
+    if not required.issubset(df.columns):
+        missing = required - set(df.columns)
+        return {"error": f"Missing columns: {missing}"}
+
     results = score_transactions(df.to_dict(orient='records'))
 
     # Save alerts for flagged transactions
     for r in results:
         if r['alert_flag']:
-            # Store minimum transaction identifying data in alerts for backend use
             add_alert({'txn_id': r['txn_id']}, r['anomaly_score'])
 
     return results
 
+# Get all alerts
 @app.get("/alerts")
 def get_flags():
     return get_alerts()
