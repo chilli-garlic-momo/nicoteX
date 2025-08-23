@@ -227,10 +227,14 @@
       border-right: 1px solid var(--glass-border);
       padding: 1.5rem;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      position: relative;
+      position: fixed; /* Fixed position to stay in place when scrolling */
+      top: 0;
+      left: 0;
+      height: 100vh; /* Full viewport height */
       overflow: hidden;
       display: flex; /* Enable flexbox for sidebar */
       flex-direction: column; /* Stack items vertically */
+      z-index: 1000; /* Ensure sidebar stays on top */
     }
 
     .sidebar:hover {
@@ -249,24 +253,12 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 2rem;
+      margin-bottom: 1rem;
       padding-bottom: 1rem;
       border-bottom: 1px solid var(--glass-border);
     }
 
-    .sidebar-footer .sidebar-nav-text {
-      opacity: 0; /* Hidden when sidebar is collapsed */
-      transform: translateX(-10px);
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      white-space: nowrap;
-      position: absolute;
-    }
 
-    .sidebar:hover .sidebar-footer .sidebar-nav-text {
-      opacity: 1; /* Visible when sidebar is hovered */
-      transform: translateX(0);
-      position: static;
-    }
 
     .sidebar-title {
       font-size: 1.5rem;
@@ -336,6 +328,36 @@
     .sidebar-toggle:hover {
       background: var(--surface-light);
       color: var(--text-primary);
+    }
+
+    .sidebar-signout {
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--glass-border);
+    }
+
+    .sidebar-signout .btn {
+      width: 100%;
+      justify-content: center;
+      padding: 0.75rem 1rem;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .sidebar-signout .btn .sidebar-nav-text {
+      opacity: 0;
+      transform: translateX(-10px);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      white-space: nowrap;
+      position: absolute;
+    }
+
+    .sidebar:hover .sidebar-signout .btn .sidebar-nav-text {
+      opacity: 1;
+      transform: translateX(0);
+      position: static;
     }
 
     .sidebar-nav {
@@ -411,7 +433,7 @@
       flex: 1;
       padding: 2rem;
       overflow-y: auto;
-      margin-left: 0;
+      margin-left: 100px; /* Account for fixed sidebar width */
       transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
@@ -646,35 +668,7 @@
       color: var(--text-secondary);
     }
 
-    .sidebar-footer {
-      margin-top: auto; /* Push to the bottom */
-      padding-top: 1rem;
-      border-top: 1px solid var(--glass-border);
-    }
 
-    .sidebar-footer .btn {
-      width: 100%;
-      justify-content: center; /* Center content of the button */
-      padding: 0.75rem 1rem; /* Adjust padding for better appearance */
-      text-align: center; /* Ensure text is centered */
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .sidebar-footer .btn .sidebar-nav-text {
-      opacity: 0;
-      transform: translateX(-10px);
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      white-space: nowrap;
-      position: absolute;
-    }
-
-    .sidebar:hover .sidebar-footer .btn .sidebar-nav-text {
-      opacity: 1;
-      transform: translateX(0);
-      position: static;
-    }
 
   </style>
 </head>
@@ -744,6 +738,13 @@
           </button>
         </div>
 
+        <!-- Sign Out Button - Moved up for better visibility -->
+        <div class="sidebar-signout">
+          <button class="btn btn-danger" onclick="handleLogout()">
+            <span class="sidebar-nav-text">Sign Out</span>
+          </button>
+        </div>
+
         <ul class="sidebar-nav">
           <li class="sidebar-nav-item">
             <a href="#" class="sidebar-nav-link active" data-section="dashboard">
@@ -770,13 +771,6 @@
             </a>
           </li>
         </ul>
-
-        <div class="sidebar-footer">
-          <button class="btn btn-danger" onclick="handleLogout()">
-            
-            <span class="sidebar-nav-text">Sign Out</span>
-          </button>
-        </div>
       </nav>
 
       <!-- Main Content -->
