@@ -1,9 +1,11 @@
+
 import os
 import torch
 import pandas as pd
 import numpy as np
 from model.autoEncoder import Autoencoder
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from backend.explainability.explaination import generate_explanation
 
 # Paths for model and preprocessors relative to this file
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -52,24 +54,64 @@ def load_model():
     return model
 
 
-def score_transaction(txn):
+
+def score_transactions(batch_txns):
     """
-    Given a single transaction dict, preprocess and score anomaly:
+    Score multiple transactions with anomaly detection and contextual analysis.
+
+    Args:
+        batch_txns (list of dict): Transactions, each as a dict including keys:
+                                  'txn_id' (optional), 'user_id', 'amount', 'location',
+                                  'device', 'merchant', 'timestamp', etc.
+
     Returns:
-      - reconstruction_error (float)
-      - alert_flag (bool)
+        list of dict: each dict contains:
+                      - txn_id
+                      - anomaly_score
+                      - alert_flag (bool)
+                      - explanation (str)
     """
-    df = pd.DataFrame([txn])
+    df = pd.DataFrame(batch_txns)
+
+    # Ensure timestamp is datetime
+    df['timestamp'] = pd.to_datetime(df['timestamp'])
+
+    # Basic contextual features per user (over the batch)
+    agg = df.groupby('user_id').agg(
+        avg_amount=('amount', 'mean'),
+        txn_count=('amount', 'count')
+    ).reset_index()
+
+    df = df.merge(agg, on='user_id', how='left')
+
+    # Preprocess input for the model (scale numeric, one-hot encode categorical)
     X = preprocess(df)
 
     X_tensor = torch.tensor(X, dtype=torch.float32)
-    model = load_model()
-
+    m = load_model()
     with torch.no_grad():
-        output = model(X_tensor)
-    error = torch.mean(torch.abs(output - X_tensor)).item()
+        output = m(X_tensor)
+    errors = torch.mean(torch.abs(output - X_tensor), dim=1).numpy()
 
-    threshold = 0.25  # Demo threshold to mark anomaly
-    alert = error > threshold
+    results = []
+    threshold = 0.25  # Adjust as necessary after tuning
+    for i, txn in df.iterrows():
+        score = errors[i]
+        alert = score > threshold
 
-    return error, alert
+        explanation = generate_explanation(txn)
+        if alert:
+            explanation += f" | Anomaly score {score:.3f} exceeds threshold."
+            # Context based checks
+            if txn['amount'] > txn['avg_amount'] * 2:
+                explanation += " Amount significantly higher than user's average."
+            if txn['txn_count'] > 5:
+                explanation += " High frequency of transactions detected."
+
+        results.append({
+            'txn_id': txn.get('txn_id', i),  # Use txn_id if available, else index
+            'anomaly_score': score,
+            'alert_flag': alert,
+            'explanation': explanation
+        })
+    return results
