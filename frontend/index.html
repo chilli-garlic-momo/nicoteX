@@ -45,10 +45,8 @@
     body::before {
       content: '';
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
       background: 
         radial-gradient(circle at 25% 25%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
         radial-gradient(circle at 75% 75%, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
@@ -83,6 +81,7 @@
       justify-content: center;
       gap: 0.5rem;
       text-decoration: none;
+      user-select: none;
     }
 
     .btn-primary {
@@ -93,6 +92,28 @@
     .btn-primary:hover {
       transform: translateY(-2px);
       box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+    }
+    .btn-primary.loading {
+      pointer-events: none;
+      opacity: 0.75;
+      position: relative;
+    }
+    .btn-primary.loading::after {
+      content: '';
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      border: 2px solid transparent;
+      border-top-color: white;
+      border-radius: 50%;
+      top: 50%;
+      right: 1rem;
+      margin-top: -9px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
 
     .btn-danger {
@@ -108,7 +129,7 @@
     /* ================= LOGIN PAGE ================= */
     #login-page {
       min-height: 100vh;
-      display: flex; /* Ensure login page is visible by default */
+      display: flex;
       align-items: center;
       justify-content: center;
       padding: 1rem;
@@ -119,6 +140,10 @@
       max-width: 420px;
       padding: 2.5rem;
       box-shadow: var(--shadow-lg);
+      background: var(--glass-bg);
+      backdrop-filter: blur(16px);
+      border-radius: 16px;
+      border: 1px solid var(--glass-border);
     }
 
     .login-header {
@@ -129,7 +154,7 @@
     .login-header h1 {
       font-size: 2rem;
       font-weight: 700;
-      color: var(--primary); /* Changed to solid primary color */
+      color: var(--primary);
       margin-bottom: 0.5rem;
     }
 
@@ -165,7 +190,8 @@
     }
 
     .form-input:focus {
-      outline: none;
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
       border-color: var(--primary);
       box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
     }
@@ -178,6 +204,7 @@
       width: 20px;
       height: 20px;
       opacity: 0.6;
+      pointer-events: none;
     }
 
     .login-actions {
@@ -188,6 +215,7 @@
       width: 100%;
       padding: 1rem;
       font-size: 1rem;
+      position: relative;
     }
 
     .login-info {
@@ -208,9 +236,28 @@
       75% { transform: translateX(10px); }
     }
 
+    /* Toggle password visibility */
+    .password-wrapper .toggle-password {
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+      user-select: none;
+      font-size: 1.2rem;
+      color: var(--text-muted);
+      user-select:none;
+    }
+    .password-wrapper .toggle-password:hover {
+      opacity: 1;
+      color: var(--primary);
+    }
+
     /* ================= DASHBOARD ================= */
     #dashboard-page {
-      display: none; /* Ensure dashboard page is hidden by default */
+      display: none;
       min-height: 100vh;
     }
 
@@ -221,20 +268,20 @@
 
     /* Sidebar */
     .sidebar {
-      width: 100px; /* Adjusted width for closed state */
+      width: 100px;
       background: var(--glass-bg);
       backdrop-filter: blur(16px);
       border-right: 1px solid var(--glass-border);
       padding: 1.5rem;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      position: fixed; /* Fixed position to stay in place when scrolling */
+      position: fixed;
       top: 0;
       left: 0;
-      height: 100vh; /* Full viewport height */
+      height: 100vh;
       overflow: hidden;
-      display: flex; /* Enable flexbox for sidebar */
-      flex-direction: column; /* Stack items vertically */
-      z-index: 1000; /* Ensure sidebar stays on top */
+      display: flex;
+      flex-direction: column;
+      z-index: 1000;
     }
 
     .sidebar:hover {
@@ -242,7 +289,7 @@
     }
 
     .sidebar.collapsed {
-      width: 100px; /* Adjusted width for collapsed state */
+      width: 100px;
     }
 
     .sidebar.collapsed:hover {
@@ -258,18 +305,16 @@
       border-bottom: 1px solid var(--glass-border);
     }
 
-
-
     .sidebar-title {
       font-size: 1.5rem;
       font-weight: 700;
       color: var(--primary);
       margin-bottom: 0.5rem;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       opacity: 0;
       transform: translateX(-10px);
       white-space: nowrap;
       position: absolute;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .sidebar:hover .sidebar-title {
@@ -281,7 +326,7 @@
     .sidebar-logo {
       width: 40px;
       height: 40px;
-      opacity: 0; /* Hidden when sidebar is collapsed */
+      opacity: 0;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       position: absolute;
     }
@@ -296,13 +341,13 @@
       font-weight: 700;
       color: var(--primary);
       margin-left: 0.5rem;
-      opacity: 1; /* Visible when sidebar is collapsed */
+      opacity: 1;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       position: static;
     }
 
     .sidebar:hover .sidebar-fd-logo {
-      opacity: 0; /* Hidden when sidebar is hovered */
+      opacity: 0;
       position: absolute;
     }
 
@@ -314,13 +359,13 @@
       padding: 0.5rem;
       border-radius: 8px;
       transition: all 0.2s ease;
-      opacity: 1; /* Visible in collapsed state */
-      transform: translateX(0px); /* Position for collapsed state */
+      opacity: 1;
+      transform: translateX(0px);
       position: static;
     }
 
     .sidebar:hover .sidebar-toggle {
-      opacity: 0; /* Hidden when sidebar is hovered */
+      opacity: 0;
       transform: translateX(10px);
       position: absolute;
     }
@@ -362,7 +407,7 @@
 
     .sidebar-nav {
       list-style: none;
-      flex-grow: 1; /* Allow navigation to take available space */
+      flex-grow: 1;
     }
 
     .sidebar-nav-item {
@@ -390,17 +435,18 @@
     .sidebar-nav-link.active {
       background: linear-gradient(135deg, var(--primary), var(--primary-dark));
       color: white;
+      box-shadow: 0 0 8px var(--primary);
     }
 
     .sidebar-nav-icon {
       width: 24px;
       height: 24px;
       flex-shrink: 0;
-      opacity: 1; /* Always visible in collapsed state */
+      opacity: 1;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      filter: invert(1) brightness(1.5); /* Increased brightness for better visibility */
-      font-size: 1.5rem; /* For emoji icons */
-      display: flex; /* To center emoji */
+      filter: invert(1) brightness(1.5);
+      font-size: 1.5rem;
+      display: flex;
       align-items: center;
       justify-content: center;
     }
@@ -433,22 +479,22 @@
       flex: 1;
       padding: 2rem;
       overflow-y: auto;
-      margin-left: 100px; /* Account for fixed sidebar width */
+      margin-left: 100px;
       transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .main-header {
       display: flex;
-      justify-content: flex-end; /* Align items to the right */
+      justify-content: flex-end;
       align-items: center;
       margin-bottom: 2rem;
       padding-bottom: 1rem;
       border-bottom: 1px solid var(--glass-border);
-      gap: 1rem; /* Add some space between items */
+      gap: 1rem;
     }
 
     .header-left {
-      display: none; /* Hide header-left content */
+      display: none;
     }
 
     .header-left h2 {
@@ -508,15 +554,15 @@
     }
 
     .dashboard-card:hover {
-      transform: translateY(-4px);
+      transform: translateY(-5px);
       box-shadow: var(--shadow-lg);
-      border-color: rgba(99, 102, 241, 0.3);
+      border-color: rgba(99, 102, 241, 0.5);
     }
 
     .card-header {
       display: flex;
       align-items: center;
-      justify-content: between;
+      justify-content: space-between;
       margin-bottom: 1rem;
     }
 
@@ -539,24 +585,24 @@
       border-radius: 20px;
       font-size: 0.85rem;
       font-weight: 500;
+      user-select:none;
     }
 
     .status-success {
-      background: rgba(16, 185, 129, 0.2);
+      background: rgba(16, 185, 129, 0.25);
       color: var(--success);
     }
 
     .status-warning {
-      background: rgba(245, 158, 11, 0.2);
+      background: rgba(245, 158, 11, 0.25);
       color: var(--warning);
     }
 
     .status-error {
-      background: rgba(239, 68, 68, 0.2);
+      background: rgba(239, 68, 68, 0.25);
       color: var(--error);
     }
 
-    /* Charts placeholder */
     .chart-placeholder {
       height: 200px;
       background: var(--surface);
@@ -566,8 +612,9 @@
       justify-content: center;
       color: var(--text-muted);
       border: 2px dashed var(--border);
-      max-height: 300px; /* Set a max height */
-      overflow-y: auto; /* Enable vertical scrolling */
+      max-height: 300px;
+      overflow-y: auto;
+      user-select:none;
     }
 
     /* Responsive Design */
@@ -636,15 +683,14 @@
       border-radius: 50%;
       border-top-color: var(--primary);
       animation: spin 1s ease-in-out infinite;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+      user-select:none;
     }
 
     /* CSV Upload Styles */
     #csvDragDropArea {
       transition: all 0.2s ease;
+      cursor: pointer;
+      user-select: none;
     }
 
     #csvDragDropArea.drag-over {
@@ -667,9 +713,6 @@
     #csvDataDisplay th {
       color: var(--text-secondary);
     }
-
-
-
   </style>
 </head>
 <body>
@@ -691,13 +734,12 @@
               class="form-input" 
               placeholder="Enter your username" 
               required 
-              autocomplete="username"
-            />
+              autocomplete="username" />
             <img class="input-icon" src="https://img.icons8.com/ios-filled/50/ffffff/user.png" alt="User icon"/>
           </div>
         </div>
 
-        <div class="form-group">
+        <div class="form-group password-wrapper">
           <label for="password">Password</label>
           <div class="input-wrapper">
             <input 
@@ -706,9 +748,9 @@
               class="form-input" 
               placeholder="Enter your password" 
               required 
-              autocomplete="current-password"
-            />
+              autocomplete="current-password" />
             <img class="input-icon" src="https://img.icons8.com/ios-filled/50/ffffff/lock.png" alt="Lock icon"/>
+            <span class="toggle-password" onclick="togglePasswordVisibility()" title="Show/Hide Password">👁️</span>
           </div>
         </div>
 
@@ -730,7 +772,7 @@
         <div class="sidebar-header">
           <h2 class="sidebar-title">Mallya<br>Catcher</h2>
           <img src="https://img.icons8.com/ios-filled/50/ffffff/bank.png" alt="Mallya Catcher Logo" class="sidebar-logo"/>
-          <span class="sidebar-fd-logo">MC</span> <!-- MC Logo -->
+          <span class="sidebar-fd-logo">MC</span>
           <button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="Toggle sidebar">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
               <path d="M3 12h18m-9-9l9 9-9 9"/>
@@ -738,30 +780,28 @@
           </button>
         </div>
 
-        <!-- Sign Out Button - Moved up for better visibility -->
-        
         <ul class="sidebar-nav">
           <li class="sidebar-nav-item">
             <a href="#" class="sidebar-nav-link active" data-section="dashboard">
-              <div class="sidebar-nav-icon">🏠</div> <!-- Dashboard icon -->
+              <div class="sidebar-nav-icon">🏠</div>
               <span class="sidebar-nav-text">Dashboard</span>
             </a>
           </li>
           <li class="sidebar-nav-item">
             <a href="#" class="sidebar-nav-link" data-section="alerts">
-              <div class="sidebar-nav-icon">🚨</div> <!-- Alerts icon -->
+              <div class="sidebar-nav-icon">🚨</div>
               <span class="sidebar-nav-text">Fraud Alerts</span>
             </a>
           </li>
           <li class="sidebar-nav-item">
             <a href="#" class="sidebar-nav-link" data-section="transactions">
-              <div class="sidebar-nav-icon">💸</div> <!-- Transactions icon -->
+              <div class="sidebar-nav-icon">💸</div>
               <span class="sidebar-nav-text">Transactions</span>
             </a>
           </li>
           <li class="sidebar-nav-item">
             <a href="#" class="sidebar-nav-link" data-section="scenarios">
-              <div class="sidebar-nav-icon">🔬</div> <!-- Scenarios icon -->
+              <div class="sidebar-nav-icon">🔬</div>
               <span class="sidebar-nav-text">Scenarios</span>
             </a>
           </li>
@@ -785,19 +825,19 @@
               <div class="user-avatar">U</div>
               <span id="welcome-message">Welcome back</span>
             </div>
-            
           </div>
         </header>
 
         <!-- Dashboard Content -->
         <div id="dashboard-content" class="page-content">
           <div class="dashboard-grid">
+            <!-- CSV Upload Card -->
             <div class="dashboard-card">
               <div class="card-header">
                 <h3 class="card-title">CSV Data Upload</h3>
               </div>
               <div class="card-content">
-                <input type="file" id="csvFileInput" accept=".csv" style="display: none;"/>
+                <input type="file" id="csvFileInput" accept=".csv" style="display: none;" />
                 <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
                   <label for="csvFileInput" class="btn btn-primary" style="flex: 1; text-align: center;">
                     Choose CSV File
@@ -806,16 +846,17 @@
                     📋 Template
                   </button>
                 </div>
-                <div id="csvDragDropArea" style="border: 2px dashed var(--border); border-radius: 12px; padding: 2rem; text-align: center; color: var(--text-muted);">
-                  Drag & Drop CSV File Here
+                <div id="csvDragDropArea" style="border: 2px dashed var(--border); border-radius: 12px; padding: 2rem; text-align: center; color: var(--text-muted); user-select:none;">
+                  Drag &amp; Drop CSV File Here
                 </div>
-                <p id="fileNameDisplay" style="margin-top: 1rem; font-size: 0.9rem; color: var(--text-secondary);"></p>
-                <div class="chart-placeholder" style="margin-top: 1rem;">
+                <p id="fileNameDisplay" style="margin-top: 1rem; font-size: 0.9rem; color: var(--text-secondary); user-select:none;"></p>
+                <div id="csvDataDisplay" class="chart-placeholder" style="margin-top: 1rem;">
                   📊 Uploaded CSV data will be displayed here
                 </div>
               </div>
             </div>
 
+            <!-- Recent Transactions Card -->
             <div class="dashboard-card">
               <div class="card-header">
                 <h3 class="card-title">Recent Transactions</h3>
@@ -829,6 +870,7 @@
               </div>
             </div>
 
+            <!-- Fraud Alerts Card -->
             <div class="dashboard-card">
               <div class="card-header">
                 <h3 class="card-title">Fraud Alerts</h3>
@@ -842,6 +884,7 @@
               </div>
             </div>
 
+            <!-- Risk Analysis Card -->
             <div class="dashboard-card">
               <div class="card-header">
                 <h3 class="card-title">Risk Analysis</h3>
@@ -852,6 +895,7 @@
               </div>
             </div>
 
+            <!-- Transaction Statistics Card -->
             <div class="dashboard-card">
               <div class="card-header">
                 <h3 class="card-title">Transaction Statistics</h3>
@@ -863,6 +907,7 @@
               </div>
             </div>
 
+            <!-- Synthetic Scenarios Card -->
             <div class="dashboard-card">
               <div class="card-header">
                 <h3 class="card-title">Synthetic Scenarios</h3>
@@ -880,6 +925,7 @@
               </div>
             </div>
 
+            <!-- System Health Card -->
             <div class="dashboard-card">
               <div class="card-header">
                 <h3 class="card-title">System Health</h3>
@@ -899,917 +945,614 @@
 
         <!-- Alerts Content -->
         <div id="alerts-content" class="page-content" style="display: none;">
-          <div class="dashboard-grid">
-            <div class="dashboard-card">
-              <div class="card-header">
-                <h3 class="card-title">Active Alerts</h3>
-                <span class="status-indicator status-success">●  0 Active</span>
-              </div>
-              <div class="card-content">
-                <div class="alert-item" style="padding: 1rem; background: var(--surface); border-radius: 8px; margin-bottom: 1rem;">
-                  <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
-                    <span style="color: var(--success);">✅</span>
-                    <strong>System Status: Normal</strong>
-                  </div>
-                  <p style="color: var(--text-muted); font-size: 0.9rem;">All fraud detection systems are operating normally. No suspicious activities detected in the last 24 hours.</p>
-                </div>
-              </div>
-            </div>
-
-            <div class="dashboard-card">
-              <div class="card-header">
-                <h3 class="card-title">Alert History</h3>
-              </div>
-              <div class="card-content">
-                <div class="alert-history">
-                  <div class="history-item" style="display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid var(--glass-border);">
-                    <div>
-                      <div style="font-weight: 600;">Unusual Login Pattern</div>
-                      <div style="color: var(--text-muted); font-size: 0.9rem;">Multiple login attempts from new device</div>
-                    </div>
-                    <div style="text-align: right;">
-                      <div style="color: var(--warning);">Resolved</div>
-                      <div style="color: var(--text-muted); font-size: 0.85rem;">2 days ago</div>
-                    </div>
-                  </div>
-                  <div class="history-item" style="display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid var(--glass-border);">
-                    <div>
-                      <div style="font-weight: 600;">High-Value Transaction</div>
-                      <div style="color: var(--text-muted); font-size: 0.9rem;">Transaction above normal spending pattern</div>
-                    </div>
-                    <div style="text-align: right;">
-                      <div style="color: var(--success);">Verified</div>
-                      <div style="color: var(--text-muted); font-size: 0.85rem;">5 days ago</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="dashboard-card">
-              <div class="card-header">
-                <h3 class="card-title">Alert Settings</h3>
-              </div>
-              <div class="card-content">
-                <div style="margin-bottom: 1rem;">
-                  <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
-                    <input type="checkbox" checked style="accent-color: var(--primary);">
-                    Email notifications for high-risk transactions
-                  </label>
-                  <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
-                    <input type="checkbox" checked style="accent-color: var(--primary);">
-                    SMS alerts for login from new devices
-                  </label>
-                  <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
-                    <input type="checkbox" style="accent-color: var(--primary);">
-                    Push notifications for all transactions
-                  </label>
-                </div>
-                <button class="btn btn-primary" style="font-size: 0.9rem; padding: 0.5rem 1rem;">
-                  Update Settings
-                </button>
-              </div>
-            </div>
-          </div>
+          <!-- Content placeholder for alerts page -->
+          <p>Alerts management content goes here.</p>
         </div>
 
         <!-- Transactions Content -->
         <div id="transactions-content" class="page-content" style="display: none;">
-          <div class="dashboard-grid">
-            <div class="dashboard-card" style="grid-column: 1 / -1;">
-              <div class="card-header">
-                <h3 class="card-title">Transaction History</h3>
-                <div style="display: flex; gap: 1rem;">
-                  <select class="form-input" style="width: auto; padding: 0.5rem;">
-                    <option>Last 30 days</option>
-                    <option>Last 7 days</option>
-                    <option>Last 90 days</option>
-                  </select>
-                  <input type="text" class="form-input" placeholder="Search transactions..." style="width: 200px; padding: 0.5rem;">
-                </div>
-              </div>
-              <div class="card-content">
-                <div class="transaction-table" style="overflow-x: auto;">
-                  <table style="width: 100%; border-collapse: collapse;">
-                    <thead>
-                      <tr style="border-bottom: 1px solid var(--glass-border);">
-                        <th style="text-align: left; padding: 1rem 0.5rem; color: var(--text-secondary);">Date</th>
-                        <th style="text-align: left; padding: 1rem 0.5rem; color: var(--text-secondary);">Description</th>
-                        <th style="text-align: left; padding: 1rem 0.5rem; color: var(--text-secondary);">Amount</th>
-                        <th style="text-align: left; padding: 1rem 0.5rem; color: var(--text-secondary);">Status</th>
-                        <th style="text-align: left; padding: 1rem 0.5rem; color: var(--text-secondary);">Risk Score</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr style="border-bottom: 1px solid var(--glass-border);">
-                        <td style="padding: 1rem 0.5rem;">2024-08-23</td>
-                        <td style="padding: 1rem 0.5rem;">Online Purchase - Amazon</td>
-                        <td style="padding: 1rem 0.5rem; color: var(--error);">-$156.99</td>
-                        <td style="padding: 1rem 0.5rem;"><span class="status-indicator status-success">Verified</span></td>
-                        <td style="padding: 1rem 0.5rem;"><span style="color: var(--success);">Low</span></td>
-                      </tr>
-                      <tr style="border-bottom: 1px solid var(--glass-border);">
-                        <td style="padding: 1rem 0.5rem;">2024-08-22</td>
-                        <td style="padding: 1rem 0.5rem;">ATM Withdrawal</td>
-                        <td style="padding: 1rem 0.5rem; color: var(--error);">-$200.00</td>
-                        <td style="padding: 1rem 0.5rem;"><span class="status-indicator status-success">Verified</span></td>
-                        <td style="padding: 1rem 0.5rem;"><span style="color: var(--success);">Low</span></td>
-                      </tr>
-                      <tr style="border-bottom: 1px solid var(--glass-border);">
-                        <td style="padding: 1rem 0.5rem;">2024-08-22</td>
-                        <td style="padding: 1rem 0.5rem;">Salary Deposit</td>
-                        <td style="padding: 1rem 0.5rem; color: var(--success);">+$3,500.00</td>
-                        <td style="padding: 1rem 0.5rem;"><span class="status-indicator status-success">Cleared</span></td>
-                        <td style="padding: 1rem 0.5rem;"><span style="color: var(--success);">None</span></td>
-                      </tr>
-                      <tr style="border-bottom: 1px solid var(--glass-border);">
-                        <td style="padding: 1rem 0.5rem;">2024-08-21</td>
-                        <td style="padding: 1rem 0.5rem;">Gas Station - Shell</td>
-                        <td style="padding: 1rem 0.5rem; color: var(--error);">-$45.67</td>
-                        <td style="padding: 1rem 0.5rem;"><span class="status-indicator status-success">Verified</span></td>
-                        <td style="padding: 1rem 0.5rem;"><span style="color: var(--success);">Low</span></td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-
-            <div class="dashboard-card">
-              <div class="card-header">
-                <h3 class="card-title">Monthly Summary</h3>
-              </div>
-              <div class="card-content">
-                <div style="margin-bottom: 1rem;">
-                  <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                    <span>Total Income:</span>
-                    <span style="color: var(--success); font-weight: 600;">+$7,250.00</span>
-                  </div>
-                  <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                    <span>Total Expenses:</span>
-                    <span style="color: var(--error); font-weight: 600;">-$2,847.32</span>
-                  </div>
-                  <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; padding-top: 0.5rem; border-top: 1px solid var(--glass-border);">
-                    <span style="font-weight: 600;">Net Change:</span>
-                    <span style="color: var(--success); font-weight: 600;">+$4,402.68</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="dashboard-card">
-              <div class="card-header">
-                <h3 class="card-title">Transaction Categories</h3>
-              </div>
-              <div class="card-content">
-                <div class="category-item" style="display: flex; justify-content: space-between; margin-bottom: 0.75rem;">
-                  <span>Shopping</span>
-                  <span style="font-weight: 600;">$856.23</span>
-                </div>
-                <div class="category-item" style="display: flex; justify-content: space-between; margin-bottom: 0.75rem;">
-                  <span>Groceries</span>
-                  <span style="font-weight: 600;">$432.11</span>
-                </div>
-                <div class="category-item" style="display: flex; justify-content: space-between; margin-bottom: 0.75rem;">
-                  <span>Gas & Transportation</span>
-                  <span style="font-weight: 600;">$267.89</span>
-                </div>
-                <div class="category-item" style="display: flex; justify-content: space-between; margin-bottom: 0.75rem;">
-                  <span>Restaurants</span>
-                  <span style="font-weight: 600;">$198.45</span>
-                </div>
-              </div>
-            </div>
-          </div>
+          <!-- Content placeholder for transactions page -->
+          <p>Transactions history content goes here.</p>
         </div>
 
         <!-- Scenarios Content -->
         <div id="scenarios-content" class="page-content" style="display: none;">
-          <div class="dashboard-grid">
-            <div class="dashboard-card">
-              <div class="card-header">
-                <h3 class="card-title">Scenario Generator</h3>
-              </div>
-              <div class="card-content">
-                <div style="margin-bottom: 1rem;">
-                  <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Fraud Type:</label>
-                  <select class="form-input" id="fraud-type-select">
-                    <option value="card-fraud">Card Fraud</option>
-                    <option value="identity-theft">Identity Theft</option>
-                    <option value="account-takeover">Account Takeover</option>
-                    <option value="phishing">Phishing Attack</option>
-                  </select>
-                </div>
-                <div style="margin-bottom: 1rem;">
-                  <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Severity Level:</label>
-                  <select class="form-input">
-                    <option value="low">Low Risk</option>
-                    <option value="medium">Medium Risk</option>
-                    <option value="high">High Risk</option>
-                  </select>
-                </div>
-                <button class="btn btn-primary">Generate Scenario</button>
-              </div>
-            </div>
-
-            <div class="dashboard-card">
-              <div class="card-header">
-                <h3 class="card-title">Active Scenarios</h3>
-              </div>
-              <div class="card-content">
-                <div class="scenario-item" style="padding: 1rem; background: var(--surface); border-radius: 8px; margin-bottom: 1rem;">
-                  <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                    <strong>Card Fraud Simulation #1</strong>
-                    <span class="status-indicator status-warning">●  Running</span>
-                  </div>
-                  <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.5rem;">Simulating unusual spending patterns across multiple merchant categories.</p>
-                  <div style="display: flex; gap: 1rem; font-size: 0.85rem;">
-                    <span>Duration: 15 min</span>
-                    <span>Transactions: 23</span>
-                    <span>Risk Score: 8.2/10</span>
-                  </div>
-                </div>
-                
-                <div class="scenario-item" style="padding: 1rem; background: var(--surface); border-radius: 8px; margin-bottom: 1rem;">
-                  <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                    <strong>Identity Theft Test #3</strong>
-                    <span class="status-indicator status-success">●  Completed</span>
-                  </div>
-                  <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.5rem;">Profile modification attempts and suspicious authentication patterns.</p>
-                  <div style="display: flex; gap: 1rem; font-size: 0.85rem;">
-                    <span>Duration: 30 min</span>
-                    <span>Attempts: 47</span>
-                    <span>Detection Rate: 96%</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="dashboard-card">
-              <div class="card-header">
-                <h3 class="card-title">Scenario Results</h3>
-              </div>
-              <div class="card-content">
-                <div class="chart-placeholder" style="height: 150px;">
-                  📈 Scenario performance metrics will be displayed here
-                </div>
-                <div style="margin-top: 1rem;">
-                  <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                    <span>Detection Accuracy:</span>
-                    <span style="color: var(--success); font-weight: 600;">94.2%</span>
-                  </div>
-                  <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                    <span>False Positives:</span>
-                    <span style="color: var(--warning); font-weight: 600;">2.1%</span>
-                  </div>
-                  <div style="display: flex; justify-content: space-between;">
-                    <span>Response Time:</span>
-                    <span style="color: var(--success); font-weight: 600;">1.3s avg</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <!-- Content placeholder for scenarios page -->
+          <p>Scenario generation content goes here.</p>
         </div>
       </main>
     </div>
   </div>
 
-  <script>
-    // Application State
-    const app = {
-  isLoggedIn: false,
-  currentUser: null,
-  apiBaseUrl: 'http://localhost:8000', // Backend API URL
-  
-  init() {
-    this.checkAuthStatus();
-    this.setupEventListeners();
-    this.updateTimestamp();
-    this.checkBackendHealth();
-  },
+<script>
+  // Application State and Logic
+  const app = {
+    isLoggedIn: false,
+    currentUser: null,
+    apiBaseUrl: 'http://localhost:8000',
 
-  checkAuthStatus() {
-    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-    if (isLoggedIn) {
-      this.showDashboard();
-    } else {
-      this.showLogin();
-    }
-  },
-
-  setupEventListeners() {
-    // Navigation
-    document.querySelectorAll('.sidebar-nav-link').forEach(link => {
-      link.addEventListener('click', (e) => {
-        e.preventDefault();
-        const section = link.getAttribute('data-section');
-        this.showSection(section);
-        this.setActiveNavItem(link);
-      });
-    });
-
-    // Scenario filter
-    const scenarioFilter = document.getElementById('scenario-filter');
-    if (scenarioFilter) {
-      scenarioFilter.addEventListener('change', (e) => this.updateScenarioDetails());
-      // or: scenarioFilter.addEventListener('change', this.updateScenarioDetails.bind(this));
-    }
-
-    // CSV File Input
-    const csvFileInput = document.getElementById('csvFileInput');
-    const csvDragDropArea = document.getElementById('csvDragDropArea');
-
-    if (csvFileInput && csvDragDropArea) {
-      csvFileInput.addEventListener('change', (e) => this.handleCsvFile(e.target.files[0]));
-      csvDragDropArea.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        csvDragDropArea.style.borderColor = 'var(--primary)';
-      });
-      csvDragDropArea.addEventListener('dragleave', (e) => {
-        e.preventDefault();
-        csvDragDropArea.style.borderColor = 'var(--border)';
-      });
-      csvDragDropArea.addEventListener('drop', (e) => {
-        e.preventDefault();
-        csvDragDropArea.style.borderColor = 'var(--border)';
-        this.handleCsvFile(e.dataTransfer.files);
-      });
-    }
-  },
-
-  showSection(sectionName) {
-    // Hide all content sections
-    document.querySelectorAll('.page-content').forEach(section => {
-      section.style.display = 'none';
-    });
-
-    // Show selected section
-    const targetSection = document.getElementById(`${sectionName}-content`);
-    if (targetSection) {
-      targetSection.style.display = 'block';
-    }
-
-    // Update page title and subtitle
-    const pageTitle = document.getElementById('page-title');
-    const pageSubtitle = document.getElementById('page-subtitle');
-
-    const sectionConfig = {
-      dashboard: {
-        title: 'Dashboard Overview',
-        subtitle: 'Monitor your banking security in real-time'
-      },
-      alerts: {
-        title: 'Fraud Alerts',
-        subtitle: 'Manage and review security alerts and notifications'
-      },
-      transactions: {
-        title: 'Transaction History',
-        subtitle: 'View and analyze your transaction patterns'
-      },
-      scenarios: {
-        title: 'Synthetic Scenarios',
-        subtitle: 'Test fraud detection with simulated scenarios'
-      }
-    };
-
-    const config = sectionConfig[sectionName] || sectionConfig.dashboard;
-    pageTitle.textContent = config.title;
-    pageSubtitle.textContent = config.subtitle;
-  },
-
-  showLogin() {
-    document.getElementById('login-page').style.display = 'flex';
-    document.getElementById('dashboard-page').style.display = 'none';
-    document.getElementById('username').focus();
-  },
-
-  showDashboard() {
-    document.getElementById('login-page').style.display = 'none';
-    document.getElementById('dashboard-page').style.display = 'block';
-    this.isLoggedIn = true;
-    this.showSection('dashboard'); // Show default section
-    this.startLiveUpdates();
-    this.updateWelcomeMessage(); // New: Update welcome message
-  },
-
-  setActiveNavItem(activeLink) {
-    document.querySelectorAll('.sidebar-nav-link').forEach(link => {
-      link.classList.remove('active');
-    });
-    activeLink.classList.add('active');
-  },
-
-  updateWelcomeMessage() { // New method
-    const username = localStorage.getItem('username') || 'User';
-    document.getElementById('welcome-message').textContent = `Hello, ${username}!`;
-    document.querySelector('.user-avatar').textContent = username.charAt(0).toUpperCase();
-  },
-
-  updateScenarioDetails() {
-    const scenario = document.getElementById('scenario-filter').value;
-    const detailsDiv = document.getElementById('synthetic-details');
-    
-    const scenarios = {
-      'normal': 'Normal operations with standard transaction patterns and expected user behavior.',
-      'fraud-type-1': 'Card fraud simulation: Unusual spending patterns, geographic anomalies, and merchant category deviations.',
-      'fraud-type-2': 'Identity theft simulation: Multiple account access attempts, profile changes, and suspicious authentication patterns.',
-      'fraud-type-3': 'Account takeover simulation: Login from new devices, password changes, and unauthorized transaction attempts.'
-    };
-
-    detailsDiv.innerHTML = `<p>${scenarios[scenario]}</p>`;
-  },
-
-  updateTimestamp() {
-    const updateElement = document.getElementById('last-update');
-    if (updateElement) {
-      const now = new Date();
-      updateElement.textContent = now.toLocaleTimeString();
-    }
-  },
-
-  startLiveUpdates() {
-    // Update timestamp every 30 seconds
-    setInterval(() => {
+    init() {
+      this.checkAuthStatus();
+      this.setupEventListeners();
       this.updateTimestamp();
-    }, 30000);
-  },
+      this.checkBackendHealth();
+    },
 
-  async handleCsvFile(file) {
-    const fileNameDisplay = document.getElementById('fileNameDisplay');
-    const csvDataDisplay = document.querySelector('#csvFileInput + label + div + p + .chart-placeholder');
+    checkAuthStatus() {
+      const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+      if (isLoggedIn) {
+        this.showDashboard();
+      } else {
+        this.showLogin();
+      }
+    },
 
-    if (!file) {
-      fileNameDisplay.textContent = 'No file selected.';
-      csvDataDisplay.innerHTML = '📊 Uploaded CSV data will be displayed here';
-      return;
-    }
-
-    fileNameDisplay.textContent = `Selected file: ${file.name}`;
-    
-    // Show loading state
-    csvDataDisplay.innerHTML = '<div style="text-align: center; padding: 2rem;"><div class="loading" style="margin: 0 auto 1rem;"></div><p>Processing CSV file...</p></div>';
-
-    try {
-      // Create FormData for file upload
-      const formData = new FormData();
-      formData.append('file', file);
-
-      // Send to backend API
-      const response = await fetch(`${this.apiBaseUrl}/transactions/batch`, {
-        method: 'POST',
-        body: formData
+    setupEventListeners() {
+      // Navigation links
+      document.querySelectorAll('.sidebar-nav-link').forEach(link => {
+        link.addEventListener('click', e => {
+          e.preventDefault();
+          const section = link.getAttribute('data-section');
+          this.showSection(section);
+          this.setActiveNavItem(link);
+        });
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Failed to process CSV file');
+      // Scenario filter
+      const scenarioFilter = document.getElementById('scenario-filter');
+      if (scenarioFilter) {
+        scenarioFilter.addEventListener('change', e => this.updateScenarioDetails());
       }
 
-      const result = await response.json();
-      
-      // Display results in CSV upload area
-      this.displayFraudAnalysisResults(result, file);
-      
-      // Update all dashboard sections with ML results
-      this.updateFraudAlerts(result);
-      this.updateTransactionStats(result);
-      this.updateRiskAnalysis(result);
-      this.updateRecentTransactions(result);
-      this.updateTransactionStatistics(result);
-      
-    } catch (error) {
-      console.error('Error processing CSV:', error);
-      csvDataDisplay.innerHTML = `<div style="color: var(--error); text-align: center; padding: 2rem;">
-        <p>❌ Error processing file: ${error.message}</p>
-        <p style="font-size: 0.9rem; margin-top: 1rem;">Please ensure your CSV has the required columns: user_id, amount, location, device, merchant, timestamp</p>
-      </div>`;
-    }
-  },
+      // CSV File Input and Drag & Drop
+      const csvFileInput = document.getElementById('csvFileInput');
+      const csvDragDropArea = document.getElementById('csvDragDropArea');
 
-  displayFraudAnalysisResults(result, file) {
-    const csvDataDisplay = document.querySelector('#csvFileInput + label + div + p + .chart-placeholder');
-    
-    let html = '<div style="overflow-x: auto;">';
-    
-    // Summary statistics
-    html += `<div style="margin-bottom: 1.5rem; padding: 1rem; background: var(--surface); border-radius: 8px;">
-      <h4 style="margin-bottom: 1rem; color: var(--primary);">📊 Analysis Summary</h4>
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
-        <div style="text-align: center;">
-          <div style="font-size: 1.5rem; font-weight: 600; color: var(--text-primary);">${result.total_transactions}</div>
-          <div style="font-size: 0.9rem; color: var(--text-secondary);">Total Transactions</div>
-        </div>
-        <div style="text-align: center;">
-          <div style="font-size: 1.5rem; font-weight: 600; color: var(--error);">${result.fraudulent_transactions}</div>
-          <div style="font-size: 0.9rem; color: var(--text-secondary);">Fraudulent Detected</div>
-        </div>
-        <div style="text-align: center;">
-          <div style="font-size: 1.5rem; font-weight: 600; color: var(--success);">${result.total_transactions - result.fraudulent_transactions}</div>
-          <div style="font-size: 0.9rem; color: var(--text-secondary);">Legitimate</div>
-        </div>
-        <div style="text-align: center;">
-          <div style="font-size: 1.5rem; font-weight: 600; color: var(--warning);">${((result.fraudulent_transactions / result.total_transactions) * 100).toFixed(1)}%</div>
-          <div style="font-size: 0.9rem; color: var(--text-secondary);">Fraud Rate</div>
-        </div>
-      </div>
-    </div>`;
-    
-    // Fraudulent transactions table
-    const fraudulentTxns = result.results.filter(r => r.alert_flag);
-    if (fraudulentTxns.length > 0) {
-      html += `<div style="margin-bottom: 1.5rem;">
-        <h4 style="margin-bottom: 1rem; color: var(--error);">🚨 Fraudulent Transactions Detected</h4>
-        <table style="width: 100%; border-collapse: collapse; text-align: left; background: var(--surface); border-radius: 8px; overflow: hidden;">
-          <thead>
-            <tr style="background: var(--surface-light);">
-              <th style="padding: 0.75rem; color: var(--text-secondary);">Transaction ID</th>
-              <th style="padding: 0.75rem; color: var(--text-secondary);">Anomaly Score</th>
-              <th style="padding: 0.75rem; color: var(--text-secondary);">Explanation</th>
-            </tr>
-          </thead>
-          <tbody>`;
-      
-      fraudulentTxns.forEach(txn => {
-        html += `<tr style="border-bottom: 1px solid var(--glass-border);">
-          <td style="padding: 0.75rem; font-weight: 600;">${txn.txn_id}</td>
-          <td style="padding: 0.75rem;">
-            <span style="color: var(--error); font-weight: 600;">${txn.anomaly_score.toFixed(3)}</span>
-          </td>
-          <td style="padding: 0.75rem; font-size: 0.9rem; color: var(--text-secondary);">${txn.explanation}</td>
-        </tr>`;
+      if(csvFileInput && csvDragDropArea) {
+        csvFileInput.addEventListener('change', e => this.handleCsvFile(e.target.files[0]));
+
+        csvDragDropArea.addEventListener('dragover', e => {
+          e.preventDefault();
+          csvDragDropArea.classList.add('drag-over');
+        });
+        csvDragDropArea.addEventListener('dragleave', e => {
+          e.preventDefault();
+          csvDragDropArea.classList.remove('drag-over');
+        });
+        csvDragDropArea.addEventListener('drop', e => {
+          e.preventDefault();
+          csvDragDropArea.classList.remove('drag-over');
+          if(e.dataTransfer.files.length && e.dataTransfer.files[0].name.endsWith('.csv')) {
+            csvFileInput.files = e.dataTransfer.files;
+            this.handleCsvFile(e.dataTransfer.files[0]);
+          } else {
+            alert('Please drop a valid CSV file.');
+          }
+        });
+      }
+    },
+
+    showSection(sectionName) {
+      document.querySelectorAll('.page-content').forEach(section => {
+        section.style.display = 'none';
       });
-      
-      html += '</tbody></table></div>';
-    }
-    
-    // All transactions table (collapsible)
-    html += `<div>
-      <details style="margin-bottom: 1rem;">
-        <summary style="cursor: pointer; padding: 0.5rem; background: var(--surface); border-radius: 8px; margin-bottom: 0.5rem;">
-          <span style="color: var(--primary); font-weight: 600;">📋 View All Transactions (${result.results.length})</span>
-        </summary>
-        <table style="width: 100%; border-collapse: collapse; text-align: left; background: var(--surface); border-radius: 8px; overflow: hidden;">
-          <thead>
-            <tr style="background: var(--surface-light);">
-              <th style="padding: 0.75rem; color: var(--text-secondary);">Transaction ID</th>
-              <th style="padding: 0.75rem; color: var(--text-secondary);">Anomaly Score</th>
-              <th style="padding: 0.75rem; color: var(--text-secondary);">Status</th>
-              <th style="padding: 0.75rem; color: var(--text-secondary);">Explanation</th>
-            </tr>
-          </thead>
-          <tbody>`;
-      
-      result.results.forEach(txn => {
+      const target = document.getElementById(`${sectionName}-content`);
+      if(target) {
+        target.style.display = 'block';
+      }
+      // Update page title and subtitle
+      const pageTitle = document.getElementById('page-title');
+      const pageSubtitle = document.getElementById('page-subtitle');
+
+      const config = {
+        dashboard: {
+          title: 'Dashboard Overview',
+          subtitle: 'Monitor your banking security in real-time'
+        },
+        alerts: {
+          title: 'Fraud Alerts',
+          subtitle: 'Manage and review security alerts and notifications'
+        },
+        transactions: {
+          title: 'Transaction History',
+          subtitle: 'View and analyze your transaction patterns'
+        },
+        scenarios: {
+          title: 'Synthetic Scenarios',
+          subtitle: 'Test fraud detection with simulated scenarios'
+        }
+      }[sectionName] || config.dashboard;
+
+      pageTitle.textContent = config.title;
+      pageSubtitle.textContent = config.subtitle;
+    },
+
+    showLogin() {
+      document.getElementById('login-page').style.display = 'flex';
+      document.getElementById('dashboard-page').style.display = 'none';
+      document.getElementById('username').focus();
+    },
+
+    showDashboard() {
+      document.getElementById('login-page').style.display = 'none';
+      document.getElementById('dashboard-page').style.display = 'block';
+      this.isLoggedIn = true;
+      this.showSection('dashboard');
+      this.startLiveUpdates();
+      this.updateWelcomeMessage();
+    },
+
+    setActiveNavItem(activeLink) {
+      document.querySelectorAll('.sidebar-nav-link').forEach(link => {
+        link.classList.remove('active');
+      });
+      activeLink.classList.add('active');
+    },
+
+    updateWelcomeMessage() {
+      const username = localStorage.getItem('username') || 'User';
+      document.getElementById('welcome-message').textContent = `Hello, ${username}!`;
+      document.querySelector('.user-avatar').textContent = username.charAt(0).toUpperCase();
+    },
+
+    updateScenarioDetails() {
+      const scenario = document.getElementById('scenario-filter').value;
+      const detailsDiv = document.getElementById('synthetic-details');
+      const scenarios = {
+        normal: 'Normal operations with standard transaction patterns and expected user behavior.',
+        'fraud-type-1': 'Card fraud simulation: Unusual spending patterns, geographic anomalies, and merchant category deviations.',
+        'fraud-type-2': 'Identity theft simulation: Multiple account access attempts, profile changes, and suspicious authentication patterns.',
+        'fraud-type-3': 'Account takeover simulation: Login from new devices, password changes, and unauthorized transaction attempts.'
+      };
+      detailsDiv.innerHTML = `<p>${scenarios[scenario]}</p>`;
+    },
+
+    updateTimestamp() {
+      const updateElement = document.getElementById('last-update');
+      if(updateElement) {
+        updateElement.textContent = new Date().toLocaleTimeString();
+      }
+    },
+
+    startLiveUpdates() {
+      setInterval(() => this.updateTimestamp(), 30000);
+    },
+
+    async handleCsvFile(file) {
+      const fileNameDisplay = document.getElementById('fileNameDisplay');
+      const csvDataDisplay = document.getElementById('csvDataDisplay');
+      if(!file) {
+        fileNameDisplay.textContent = 'No file selected.';
+        csvDataDisplay.innerHTML = '📊 Uploaded CSV data will be displayed here';
+        return;
+      }
+      fileNameDisplay.textContent = `Selected file: ${file.name}`;
+      csvDataDisplay.innerHTML = `<div style="text-align:center; padding:2rem;"><div class="loading" style="margin:0 auto 1rem;"></div><p>Processing CSV file...</p></div>`;
+
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const response = await fetch(`${this.apiBaseUrl}/transactions/batch`, {
+          method: 'POST',
+          body: formData
+        });
+        if(!response.ok){
+          const errorData = await response.json();
+          throw new Error(errorData.detail || 'Failed to process CSV file');
+        }
+        const result = await response.json();
+
+        this.displayFraudAnalysisResults(result);
+        this.updateFraudAlerts(result);
+        this.updateTransactionStats(result);
+        this.updateRiskAnalysis(result);
+        this.updateRecentTransactions(result);
+        this.updateTransactionStatistics(result);
+
+      } catch(error){
+        console.error('Error processing CSV:', error);
+        csvDataDisplay.innerHTML = `<div style="color: var(--error); text-align:center; padding:2rem;">
+          <p>❌ Error processing file: ${error.message}</p>
+          <p style="font-size:0.9rem; margin-top:1rem;">Please ensure your CSV has the required columns: user_id, amount, location, device, merchant, timestamp</p>
+        </div>`;
+      }
+    },
+
+    displayFraudAnalysisResults(result) {
+      const csvDataDisplay = document.getElementById('csvDataDisplay');
+      let html = `<div style="overflow-x:auto;">`;
+
+      html += `
+        <div style="margin-bottom:1.5rem; padding:1rem; background: var(--surface); border-radius:8px;">
+          <h4 style="margin-bottom:1rem; color: var(--primary);">📊 Analysis Summary</h4>
+          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+            <div style="text-align:center;">
+              <div style="font-size:1.5rem; font-weight:600; color: var(--text-primary);">${result.total_transactions}</div>
+              <div style="font-size:0.9rem; color: var(--text-secondary);">Total Transactions</div>
+            </div>
+            <div style="text-align:center;">
+              <div style="font-size:1.5rem; font-weight:600; color: var(--error);">${result.fraudulent_transactions}</div>
+              <div style="font-size:0.9rem; color: var(--text-secondary);">Fraudulent Detected</div>
+            </div>
+            <div style="text-align:center;">
+              <div style="font-size:1.5rem; font-weight:600; color: var(--success);">${result.total_transactions - result.fraudulent_transactions}</div>
+              <div style="font-size:0.9rem; color: var(--text-secondary);">Legitimate</div>
+            </div>
+            <div style="text-align:center;">
+              <div style="font-size:1.5rem; font-weight:600; color: var(--warning);">${((result.fraudulent_transactions / result.total_transactions) * 100).toFixed(1)}%</div>
+              <div style="font-size:0.9rem; color: var(--text-secondary);">Fraud Rate</div>
+            </div>
+          </div>
+        </div>`;
+
+      const fraudulentTxns = result.results.filter(txn => txn.alert_flag);
+      if(fraudulentTxns.length > 0){
+        html += `
+        <div style="margin-bottom:1.5rem;">
+          <h4 style="margin-bottom:1rem; color: var(--error);">🚨 Fraudulent Transactions Detected</h4>
+          <table style="width:100%; border-collapse:collapse; text-align:left; background: var(--surface); border-radius:8px; overflow:hidden;">
+            <thead>
+              <tr style="background: var(--surface-light);">
+                <th style="padding: 0.75rem; color: var(--text-secondary);">Transaction ID</th>
+                <th style="padding: 0.75rem; color: var(--text-secondary);">Anomaly Score</th>
+                <th style="padding: 0.75rem; color: var(--text-secondary);">Explanation</th>
+              </tr>
+            </thead>
+            <tbody>`;
+        fraudulentTxns.forEach(txn=>{
+          html += `
+            <tr style="border-bottom: 1px solid var(--glass-border);">
+              <td style="padding:0.75rem; font-weight:600;">${txn.txn_id}</td>
+              <td style="padding:0.75rem; color: var(--error); font-weight: 600;">${txn.anomaly_score.toFixed(3)}</td>
+              <td style="padding:0.75rem; font-size: 0.9rem; color: var(--text-secondary);">${txn.explanation}</td>
+            </tr>`;
+        });
+        html += `</tbody></table></div>`;
+      }
+
+      html += `
+      <div>
+        <details style="margin-bottom:1rem;">
+          <summary style="cursor:pointer; padding:0.5rem; background: var(--surface); border-radius:8px; margin-bottom:0.5rem; font-weight:600; color: var(--primary);">
+            📋 View All Transactions (${result.results.length})
+          </summary>
+          <table style="width:100%; border-collapse:collapse; text-align:left; background: var(--surface); border-radius:8px; overflow:hidden;">
+            <thead>
+              <tr style="background: var(--surface-light);">
+                <th style="padding:0.75rem; color: var(--text-secondary);">Transaction ID</th>
+                <th style="padding:0.75rem; color: var(--text-secondary);">Anomaly Score</th>
+                <th style="padding:0.75rem; color: var(--text-secondary);">Status</th>
+                <th style="padding:0.75rem; color: var(--text-secondary);">Explanation</th>
+              </tr>
+            </thead>
+            <tbody>`;
+      result.results.forEach(txn=>{
         const statusColor = txn.alert_flag ? 'var(--error)' : 'var(--success)';
         const statusText = txn.alert_flag ? '🚨 Fraudulent' : '✅ Legitimate';
-        
-        html += `<tr style="border-bottom: 1px solid var(--glass-border);">
-          <td style="padding: 0.75rem; font-weight: 600;">${txn.txn_id}</td>
-          <td style="padding: 0.75rem;">
-            <span style="color: ${statusColor}; font-weight: 600;">${txn.anomaly_score.toFixed(3)}</span>
-          </td>
-          <td style="padding: 0.75rem;">
-            <span style="color: ${statusColor}; font-weight: 600;">${statusText}</span>
-          </td>
-          <td style="padding: 0.75rem; font-size: 0.9rem; color: var(--text-secondary);">${txn.explanation}</td>
-        </tr>`;
+        html += `
+          <tr style="border-bottom: 1px solid var(--glass-border);">
+            <td style="padding:0.75rem; font-weight:600;">${txn.txn_id}</td>
+            <td style="padding:0.75rem; color:${statusColor}; font-weight:600;">${txn.anomaly_score.toFixed(3)}</td>
+            <td style="padding:0.75rem; color:${statusColor}; font-weight:600;">${statusText}</td>
+            <td style="padding:0.75rem; font-size:0.9rem; color: var(--text-secondary);">${txn.explanation}</td>
+          </tr>`;
       });
-      
-      html += '</tbody></table></details></div>';
-    
-    html += '</div>';
-    csvDataDisplay.innerHTML = html;
-  },
+      html += `</tbody></table></details></div></div>`;
 
-  updateFraudAlerts(result) {
-    const alertList = document.getElementById('alert-list');
-    const alertStatus = document.getElementById('alert-status');
-    const fraudulentCount = result.fraudulent_transactions;
-    
-    // Update alert status indicator
-    if (fraudulentCount > 0) {
-      alertStatus.textContent = `●  ${fraudulentCount} Alert${fraudulentCount > 1 ? 's' : ''}`;
-      alertStatus.className = 'status-indicator status-error';
-    } else {
-      alertStatus.textContent = '●  Clear';
-      alertStatus.className = 'status-indicator status-success';
-    }
-    
-    if (fraudulentCount > 0) {
-      const fraudulentTxns = result.results.filter(r => r.alert_flag);
-      let html = `<div style="margin-bottom: 1rem;">
-        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
-          <span style="color: var(--error);">🚨</span>
-          <strong>${fraudulentCount} Fraudulent Transaction${fraudulentCount > 1 ? 's' : ''} Detected</strong>
-        </div>`;
-      
-      fraudulentTxns.slice(0, 3).forEach(txn => {
-        html += `<div style="padding: 0.75rem; background: var(--surface); border-radius: 8px; margin-bottom: 0.5rem; border-left: 4px solid var(--error);">
-          <div style="font-weight: 600; margin-bottom: 0.25rem;">Transaction ID: ${txn.txn_id}</div>
-          <div style="font-size: 0.9rem; color: var(--text-secondary);">Risk Score: ${txn.anomaly_score.toFixed(3)}</div>
-          <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem;">${txn.explanation}</div>
-        </div>`;
-      });
-      
-      if (fraudulentCount > 3) {
-        html += `<div style="font-size: 0.9rem; color: var(--text-muted);">... and ${fraudulentCount - 3} more</div>`;
-      }
-      
-      html += '</div>';
-      alertList.innerHTML = html;
-    } else {
-      alertList.innerHTML = `<p>✅ No suspicious activity detected</p>
-        <p style="margin-top: 0.5rem; color: var(--text-muted); font-size: 0.9rem;">
-          All ${result.total_transactions} transactions analyzed successfully
-        </p>`;
-    }
-  },
+      csvDataDisplay.innerHTML = html;
+    },
 
-  updateTransactionStats(result) {
-    const transactionStream = document.getElementById('transaction-stream');
-    const legitimateCount = result.total_transactions - result.fraudulent_transactions;
-    
-    // Calculate additional statistics
-    const avgScore = result.results.reduce((sum, txn) => sum + txn.anomaly_score, 0) / result.total_transactions;
-    const highRiskCount = result.results.filter(txn => txn.anomaly_score > 0.5).length;
-    const mediumRiskCount = result.results.filter(txn => txn.anomaly_score > 0.25 && txn.anomaly_score <= 0.5).length;
-    
-    transactionStream.innerHTML = `
-      <div style="margin-bottom: 1rem;">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-          <span>Total Processed:</span>
-          <span style="font-weight: 600;">${result.total_transactions} transactions</span>
-        </div>
-        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-          <span>✅ Legitimate:</span>
-          <span style="color: var(--success); font-weight: 600;">${legitimateCount}</span>
-        </div>
-        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-          <span>🚨 Fraudulent:</span>
-          <span style="color: var(--error); font-weight: 600;">${result.fraudulent_transactions}</span>
-        </div>
-        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-          <span>⚠️ High Risk:</span>
-          <span style="color: var(--warning); font-weight: 600;">${highRiskCount}</span>
-        </div>
-        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-          <span>📊 Avg Risk Score:</span>
-          <span style="font-weight: 600;">${avgScore.toFixed(3)}</span>
-        </div>
-      </div>
-      <p style="margin-top: 0.5rem; color: var(--text-muted); font-size: 0.9rem;">
-        Last update: <span id="last-update">Just now</span>
-      </p>
-    `;
-  },
+    updateFraudAlerts(result) {
+      const alertList = document.getElementById('alert-list');
+      const alertStatus = document.getElementById('alert-status');
+      const fraudulentCount = result.fraudulent_transactions;
 
-  updateRecentTransactions(result) {
-    const transactionStream = document.getElementById('transaction-stream');
-    
-    // Get the most recent transactions (last 5)
-    const recentTxns = result.results.slice(-5).reverse();
-    
-    let html = `<div style="margin-bottom: 1rem;">`;
-    
-    recentTxns.forEach(txn => {
-      const statusIcon = txn.alert_flag ? '🚨' : '✅';
-      const statusColor = txn.alert_flag ? 'var(--error)' : 'var(--success)';
-      const riskLevel = txn.anomaly_score > 0.5 ? 'High' : txn.anomaly_score > 0.25 ? 'Medium' : 'Low';
-      
-      html += `<div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid var(--glass-border);">
-        <div style="flex: 1;">
-          <div style="display: flex; align-items: center; gap: 0.5rem;">
-            <span style="color: ${statusColor};">${statusIcon}</span>
-            <span style="font-weight: 600;">TXN-${txn.txn_id}</span>
-          </div>
-          <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.25rem;">
-            Risk: ${riskLevel} (${txn.anomaly_score.toFixed(3)})
-          </div>
-        </div>
-        <div style="text-align: right;">
-          <div style="font-size: 0.9rem; color: ${statusColor}; font-weight: 600;">
-            ${txn.alert_flag ? 'Fraudulent' : 'Legitimate'}
-          </div>
-        </div>
-      </div>`;
-    });
-    
-    html += `</div>
-      <p style="margin-top: 0.5rem; color: var(--text-muted); font-size: 0.9rem;">
-        Last update: <span id="last-update">Just now</span>
-      </p>`;
-    
-    transactionStream.innerHTML = html;
-  },
-
-  updateTransactionStatistics(result) {
-    const transactionStats = document.getElementById('transaction-statistics');
-    const totalCount = result.total_transactions;
-    const fraudulentCount = result.fraudulent_transactions;
-    const legitimateCount = totalCount - fraudulentCount;
-    
-    // Calculate risk distribution
-    const highRisk = result.results.filter(txn => txn.anomaly_score > 0.5).length;
-    const mediumRisk = result.results.filter(txn => txn.anomaly_score > 0.25 && txn.anomaly_score <= 0.5).length;
-    const lowRisk = result.results.filter(txn => txn.anomaly_score <= 0.25).length;
-    
-    // Calculate percentages for visual bars
-    const highRiskPercent = (highRisk / totalCount) * 100;
-    const mediumRiskPercent = (mediumRisk / totalCount) * 100;
-    const lowRiskPercent = (lowRisk / totalCount) * 100;
-    
-    let html = `<div style="margin-bottom: 1.5rem;">
-      <h4 style="margin-bottom: 1rem; color: var(--primary);">📊 Risk Distribution</h4>
-      
-      <div style="margin-bottom: 1rem;">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-          <span>High Risk (Score > 0.5)</span>
-          <span style="color: var(--error); font-weight: 600;">${highRisk} (${highRiskPercent.toFixed(1)}%)</span>
-        </div>
-        <div style="background: var(--surface); border-radius: 4px; height: 8px; overflow: hidden;">
-          <div style="background: var(--error); height: 100%; width: ${highRiskPercent}%; transition: width 0.3s ease;"></div>
-        </div>
-      </div>
-      
-      <div style="margin-bottom: 1rem;">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-          <span>Medium Risk (0.25-0.5)</span>
-          <span style="color: var(--warning); font-weight: 600;">${mediumRisk} (${mediumRiskPercent.toFixed(1)}%)</span>
-        </div>
-        <div style="background: var(--surface); border-radius: 4px; height: 8px; overflow: hidden;">
-          <div style="background: var(--warning); height: 100%; width: ${mediumRiskPercent}%; transition: width 0.3s ease;"></div>
-        </div>
-      </div>
-      
-      <div style="margin-bottom: 1rem;">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-          <span>Low Risk (≤ 0.25)</span>
-          <span style="color: var(--success); font-weight: 600;">${lowRisk} (${lowRiskPercent.toFixed(1)}%)</span>
-        </div>
-        <div style="background: var(--surface); border-radius: 4px; height: 8px; overflow: hidden;">
-          <div style="background: var(--success); height: 100%; width: ${lowRiskPercent}%; transition: width 0.3s ease;"></div>
-        </div>
-      </div>
-    </div>
-    
-    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
-      <div style="text-align: center; padding: 1rem; background: var(--surface); border-radius: 8px;">
-        <div style="font-size: 1.5rem; font-weight: 600; color: var(--success);">${legitimateCount}</div>
-        <div style="font-size: 0.9rem; color: var(--text-secondary);">Legitimate</div>
-      </div>
-      <div style="text-align: center; padding: 1rem; background: var(--surface); border-radius: 8px;">
-        <div style="font-size: 1.5rem; font-weight: 600; color: var(--error);">${fraudulentCount}</div>
-        <div style="font-size: 0.9rem; color: var(--text-secondary);">Fraudulent</div>
-      </div>
-    </div>`;
-    
-    transactionStats.innerHTML = html;
-  },
-
-  updateRiskAnalysis(result) {
-    const explanationBox = document.getElementById('explanation-box');
-    const fraudulentCount = result.fraudulent_transactions;
-    const totalCount = result.total_transactions;
-    const fraudRate = ((fraudulentCount / totalCount) * 100).toFixed(1);
-    
-    // Get unique risk factors from explanations
-    const riskFactors = new Set();
-    result.results.forEach(txn => {
-      if (txn.explanation) {
-        const factors = txn.explanation.split('.').filter(f => f.trim());
-        factors.forEach(factor => riskFactors.add(factor.trim()));
-      }
-    });
-    
-    let html = `<div style="margin-bottom: 1rem;">
-      <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-        <span>Overall Fraud Rate:</span>
-        <span style="color: ${fraudulentCount > 0 ? 'var(--error)' : 'var(--success)'}; font-weight: 600;">${fraudRate}%</span>
-      </div>
-      <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-        <span>Risk Level:</span>
-        <span style="color: ${fraudRate > 10 ? 'var(--error)' : fraudRate > 5 ? 'var(--warning)' : 'var(--success)'}; font-weight: 600;">
-          ${fraudRate > 10 ? '🔴 High' : fraudRate > 5 ? '🟡 Medium' : '🟢 Low'}
-        </span>
-      </div>
-    </div>`;
-    
-    if (riskFactors.size > 0) {
-      html += `<div style="margin-bottom: 1rem;">
-        <h4 style="margin-bottom: 0.5rem; color: var(--primary);">🔍 Detected Risk Factors:</h4>
-        <ul style="margin-left: 1rem; color: var(--text-secondary);">`;
-      
-      Array.from(riskFactors).slice(0, 5).forEach(factor => {
-        html += `<li style="margin-bottom: 0.25rem;">${factor}</li>`;
-      });
-      
-      html += `</ul></div>`;
-    }
-    
-    html += `<p style="color: var(--text-secondary); font-size: 0.9rem;">
-      Advanced fraud detection algorithms analyzed ${totalCount} transactions using machine learning patterns including amount analysis, location verification, device authentication, and temporal behavior patterns.
-    </p>`;
-    
-    explanationBox.innerHTML = html;
-  },
-
-  async checkBackendHealth() {
-    try {
-      const response = await fetch(`${this.apiBaseUrl}/health`);
-      if (response.ok) {
-        console.log('Backend API is healthy');
+      if(fraudulentCount > 0){
+        alertStatus.textContent = `●  ${fraudulentCount} Alert${fraudulentCount>1?'s':''}`;
+        alertStatus.className = 'status-indicator status-error';
+        const fraudulentTxns = result.results.filter(txn => txn.alert_flag);
+        let html = `
+          <div style="margin-bottom:1rem;">
+            <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.5rem;">
+              <span style="color: var(--error);">🚨</span>
+              <strong>${fraudulentCount} Fraudulent Transaction${fraudulentCount>1?'s':''} Detected</strong>
+            </div>`;
+        fraudulentTxns.slice(0,3).forEach(txn => {
+          html += `
+            <div style="padding:0.75rem; background: var(--surface); border-radius:8px; margin-bottom:0.5rem; border-left:4px solid var(--error);">
+              <div style="font-weight:600; margin-bottom:0.25rem;">Transaction ID: ${txn.txn_id}</div>
+              <div style="font-size:0.9rem; color: var(--text-secondary);">Risk Score: ${txn.anomaly_score.toFixed(3)}</div>
+              <div style="font-size:0.85rem; color: var(--text-muted); margin-top:0.25rem;">${txn.explanation}</div>
+            </div>`;
+        });
+        if(fraudulentCount > 3) {
+          html += `<div style="font-size:0.9rem; color: var(--text-muted);">... and ${fraudulentCount-3} more</div>`;
+        }
+        html += `</div>`;
+        alertList.innerHTML = html;
       } else {
-        console.warn('Backend API health check failed');
+        alertStatus.textContent = '●  Clear';
+        alertStatus.className = 'status-indicator status-success';
+        alertList.innerHTML = `
+          <p>✅ No suspicious activity detected</p>
+          <p style="margin-top:0.5rem; color: var(--text-muted); font-size: 0.9rem;">
+            All ${result.total_transactions} transactions analyzed successfully
+          </p>`;
       }
-    } catch (error) {
-      console.warn('Backend API not available:', error.message);
-    }
-  },
+    },
 
-  downloadTemplate() {
-    // Create sample CSV content
-    const csvContent = `user_id,amount,location,device,merchant,timestamp
+    updateTransactionStats(result) {
+      const transactionStream = document.getElementById('transaction-stream');
+      const legitimateCount = result.total_transactions - result.fraudulent_transactions;
+      const avgScore = result.results.reduce((sum, txn) => sum + txn.anomaly_score, 0) / result.total_transactions;
+      const highRiskCount = result.results.filter(txn => txn.anomaly_score > 0.5).length;
+      const mediumRiskCount = result.results.filter(txn => txn.anomaly_score > 0.25 && txn.anomaly_score <= 0.5).length;
+
+      transactionStream.innerHTML = `
+        <div style="margin-bottom:1rem;">
+          <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem;">
+            <span>Total Processed:</span>
+            <span style="font-weight:600;">${result.total_transactions} transactions</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem;">
+            <span>✅ Legitimate:</span>
+            <span style="color: var(--success); font-weight:600;">${legitimateCount}</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem;">
+            <span>🚨 Fraudulent:</span>
+            <span style="color: var(--error); font-weight:600;">${result.fraudulent_transactions}</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem;">
+            <span>⚠️ High Risk:</span>
+            <span style="color: var(--warning); font-weight:600;">${highRiskCount}</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem;">
+            <span>📊 Avg Risk Score:</span>
+            <span style="font-weight:600;">${avgScore.toFixed(3)}</span>
+          </div>
+        </div>
+        <p style="margin-top:0.5rem; color: var(--text-muted); font-size:0.9rem;">
+          Last update: <span id="last-update">Just now</span>
+        </p>
+      `;
+    },
+
+    updateRecentTransactions(result) {
+      const transactionStream = document.getElementById('transaction-stream');
+      const recentTxns = result.results.slice(-5).reverse();
+      let html = '<div style="margin-bottom:1rem;">';
+      recentTxns.forEach(txn => {
+        const statusIcon = txn.alert_flag ? '🚨' : '✅';
+        const statusColor = txn.alert_flag ? 'var(--error)' : 'var(--success)';
+        const riskLevel = txn.anomaly_score > 0.5 ? 'High' : txn.anomaly_score > 0.25 ? 'Medium' : 'Low';
+        html += `
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:0.5rem 0; border-bottom:1px solid var(--glass-border);">
+            <div style="flex:1;">
+              <div style="display:flex; align-items:center; gap:0.5rem;">
+                <span style="color:${statusColor};">${statusIcon}</span>
+                <span style="font-weight:600;">TXN-${txn.txn_id}</span>
+              </div>
+              <div style="font-size:0.85rem; color: var(--text-secondary); margin-top:0.25rem;">
+                Risk: ${riskLevel} (${txn.anomaly_score.toFixed(3)})
+              </div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:0.9rem; color:${statusColor}; font-weight:600;">
+                ${txn.alert_flag ? 'Fraudulent' : 'Legitimate'}
+              </div>
+            </div>
+          </div>`;
+      });
+      html += `
+        </div>
+        <p style="margin-top:0.5rem; color: var(--text-muted); font-size:0.9rem;">
+          Last update: <span id="last-update">Just now</span>
+        </p>
+      `;
+      transactionStream.innerHTML = html;
+    },
+
+    updateTransactionStatistics(result) {
+      const transactionStats = document.getElementById('transaction-statistics');
+      const totalCount = result.total_transactions;
+      const fraudulentCount = result.fraudulent_transactions;
+      const legitimateCount = totalCount - fraudulentCount;
+      const highRisk = result.results.filter(txn => txn.anomaly_score > 0.5).length;
+      const mediumRisk = result.results.filter(txn => txn.anomaly_score > 0.25 && txn.anomaly_score <= 0.5).length;
+      const lowRisk = result.results.filter(txn => txn.anomaly_score <= 0.25).length;
+      const highRiskPercent = (highRisk / totalCount) * 100;
+      const mediumRiskPercent = (mediumRisk / totalCount) * 100;
+      const lowRiskPercent = (lowRisk / totalCount) * 100;
+
+      transactionStats.innerHTML = `
+        <div style="margin-bottom:1.5rem;">
+          <h4 style="margin-bottom:1rem; color: var(--primary);">📊 Risk Distribution</h4>
+          
+          <div style="margin-bottom:1rem;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem;">
+              <span>High Risk (Score > 0.5)</span>
+              <span style="color: var(--error); font-weight:600;">${highRisk} (${highRiskPercent.toFixed(1)}%)</span>
+            </div>
+            <div style="background: var(--surface); border-radius:4px; height:8px; overflow:hidden;">
+              <div style="background: var(--error); height:100%; width:${highRiskPercent}%; transition: width 0.3s ease;"></div>
+            </div>
+          </div>
+          
+          <div style="margin-bottom:1rem;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem;">
+              <span>Medium Risk (0.25-0.5)</span>
+              <span style="color: var(--warning); font-weight:600;">${mediumRisk} (${mediumRiskPercent.toFixed(1)}%)</span>
+            </div>
+            <div style="background: var(--surface); border-radius:4px; height:8px; overflow:hidden;">
+              <div style="background: var(--warning); height:100%; width:${mediumRiskPercent}%; transition: width 0.3s ease;"></div>
+            </div>
+          </div>
+          
+          <div style="margin-bottom:1rem;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem;">
+              <span>Low Risk (≤ 0.25)</span>
+              <span style="color: var(--success); font-weight:600;">${lowRisk} (${lowRiskPercent.toFixed(1)}%)</span>
+            </div>
+            <div style="background: var(--surface); border-radius:4px; height:8px; overflow:hidden;">
+              <div style="background: var(--success); height:100%; width:${lowRiskPercent}%; transition: width 0.3s ease;"></div>
+            </div>
+          </div>
+        </div>
+        <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:1rem;">
+          <div style="text-align:center; padding:1rem; background: var(--surface); border-radius:8px;">
+            <div style="font-size:1.5rem; font-weight:600; color: var(--success);">${legitimateCount}</div>
+            <div style="font-size:0.9rem; color: var(--text-secondary);">Legitimate</div>
+          </div>
+          <div style="text-align:center; padding:1rem; background: var(--surface); border-radius:8px;">
+            <div style="font-size:1.5rem; font-weight:600; color: var(--error);">${fraudulentCount}</div>
+            <div style="font-size:0.9rem; color: var(--text-secondary);">Fraudulent</div>
+          </div>
+        </div>
+      `;
+    },
+
+    updateRiskAnalysis(result) {
+      const explanationBox = document.getElementById('explanation-box');
+      const fraudulentCount = result.fraudulent_transactions;
+      const totalCount = result.total_transactions;
+      const fraudRate = ((fraudulentCount / totalCount) * 100).toFixed(1);
+      const riskFactors = new Set();
+
+      result.results.forEach(txn => {
+        if(txn.explanation) {
+          txn.explanation.split('.').filter(f => f.trim()).forEach(f => riskFactors.add(f.trim()));
+        }
+      });
+
+      let html = `
+        <div style="margin-bottom:1rem;">
+          <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem;">
+            <span>Overall Fraud Rate:</span>
+            <span style="color: ${fraudulentCount > 0 ? 'var(--error)' : 'var(--success)'}; font-weight:600;">${fraudRate}%</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem;">
+            <span>Risk Level:</span>
+            <span style="color: ${fraudRate > 10 ? 'var(--error)' : fraudRate > 5 ? 'var(--warning)' : 'var(--success)'}; font-weight:600;">
+              ${fraudRate > 10 ? '🔴 High' : fraudRate > 5 ? '🟡 Medium' : '🟢 Low'}
+            </span>
+          </div>
+        </div>`;
+
+      if(riskFactors.size > 0) {
+        html += `
+          <div style="margin-bottom: 1rem;">
+            <h4 style="margin-bottom: 0.5rem; color: var(--primary);">🔍 Detected Risk Factors:</h4>
+            <ul style="margin-left: 1rem; color: var(--text-secondary);">`;
+        Array.from(riskFactors).slice(0, 5).forEach(f => {
+          html += `<li style="margin-bottom:0.25rem;">${f}</li>`;
+        });
+        html += `</ul></div>`;
+      }
+
+      html += `<p style="color: var(--text-secondary); font-size: 0.9rem;">
+        Advanced fraud detection algorithms analyzed ${totalCount} transactions using machine learning patterns including amount analysis, location verification, device authentication, and temporal behavior patterns.
+      </p>`;
+
+      explanationBox.innerHTML = html;
+    },
+
+    async checkBackendHealth() {
+      try {
+        const response = await fetch(`${this.apiBaseUrl}/health`);
+        if (response.ok) {
+          console.log('Backend API is healthy');
+        } else {
+          console.warn('Backend API health check failed');
+        }
+      } catch (error) {
+        console.warn('Backend API not available:', error.message);
+      }
+    },
+
+    downloadTemplate() {
+      const csvContent = `user_id,amount,location,device,merchant,timestamp
 user_1,1500.50,Mumbai,android,Cafe,2024-01-15 14:30:00
 user_2,2500.75,Delhi,ios,Grocery,2024-01-15 15:45:00
 user_3,800.25,Bangalore,web,Electronics,2024-01-15 16:20:00
 user_1,3200.00,Mumbai,android,Online Store,2024-01-15 17:10:00
 user_2,450.80,Delhi,ios,Cafe,2024-01-15 18:30:00`;
 
-    // Create and download file
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'transaction_template.csv';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
-  }
-};
-
-// Authentication Functions
-function handleLogin(event) {
-  event.preventDefault();
-  
-  const form = document.querySelector('.login-container');
-  const loginBtn = document.getElementById('login-text');
-  const loadingSpinner = document.getElementById('login-loading');
-  const username = document.getElementById('username').value.trim();
-  const password = document.getElementById('password').value;
-
-  // Show loading state
-  loginBtn.style.display = 'none';
-  loadingSpinner.style.display = 'block';
-
-  // Simulate API call delay
-  setTimeout(() => {
-    const validCredentials = username === 'user123' && password === 'pass123';
-    
-    if (validCredentials) {
-      localStorage.setItem('isLoggedIn', 'true');
-      localStorage.setItem('username', username);
-      app.currentUser = username;
-      app.showDashboard();
-    } else {
-      // Reset button state
-      loginBtn.style.display = 'block';
-      loadingSpinner.style.display = 'none';
-      
-      // Show error
-      form.classList.add('shake');
-      setTimeout(() => form.classList.remove('shake'), 500);
-      
-      // Focus on username field
-      document.getElementById('username').focus();
-      document.getElementById('username').select();
+      const blob = new Blob([csvContent], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'transaction_template.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
     }
-  }, 1000);
-}
+  };
 
-function handleLogout() {
-  if (confirm('Are you sure you want to sign out?')) {
-    localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('username');
-    app.currentUser = null;
-    app.isLoggedIn = false;
-    app.showLogin();
+  // Authentication Functions
+  function handleLogin(event) {
+    event.preventDefault();
+
+    const form = document.querySelector('.login-container');
+    const loginBtn = document.getElementById('login-text');
+    const loadingSpinner = document.getElementById('login-loading');
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+
+    loginBtn.style.display = 'none';
+    loadingSpinner.style.display = 'block';
+
+    setTimeout(() => {
+      const validCredentials = username === 'user123' && password === 'pass123';
+      if(validCredentials){
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('username', username);
+        app.currentUser = username;
+        app.showDashboard();
+      }
+      else {
+        loginBtn.style.display = 'block';
+        loadingSpinner.style.display = 'none';
+        form.classList.add('shake');
+        setTimeout(() => form.classList.remove('shake'), 500);
+        document.getElementById('username').focus();
+        document.getElementById('username').select();
+      }
+    }, 1000);
   }
-}
 
-function toggleSidebar() {
-  const sidebar = document.getElementById('sidebar');
-  if (window.innerWidth <= 768) {
-    sidebar.classList.toggle('collapsed');
+  function handleLogout() {
+    if(confirm('Are you sure you want to sign out?')) {
+      localStorage.removeItem('isLoggedIn');
+      localStorage.removeItem('username');
+      app.currentUser = null;
+      app.isLoggedIn = false;
+      app.showLogin();
+    }
   }
-}
 
-// Initialize app when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-  app.init();
-});
+  function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    if(window.innerWidth <= 768){
+      sidebar.classList.toggle('collapsed');
+    }
+  }
 
-  </script>
+  function togglePasswordVisibility() {
+    const pwInput = document.getElementById('password');
+    if(pwInput.type === 'password'){
+      pwInput.type = 'text';
+    }
+    else {
+      pwInput.type = 'password';
+    }
+  }
+
+  // Initialize app when DOM is loaded
+  document.addEventListener('DOMContentLoaded', () => {
+    app.init();
+  });
+</script>
 </body>
 </html>
