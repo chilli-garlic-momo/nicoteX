@@ -5,6 +5,7 @@ scikit-learn
 fastapi
 uvicorn
 requests
+python-multipart
 
 # python backend/dataGennormal.py         # creates normalTransactions.csv
 # python backend/dataGenfraudPatterns.py  # injects frauds, creates syntheticTransactions.csv
