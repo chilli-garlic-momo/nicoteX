@@ -12,7 +12,7 @@ app = FastAPI(title="Fraud Detection API", version="1.0.0")
 # Add CORS middleware for frontend integration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, specify your frontend domain
+    allow_origins=["https://the-mallya-catcher.onrender.com"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
